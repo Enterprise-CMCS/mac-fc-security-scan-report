@@ -6,15 +6,15 @@ inputs:
   jira-username:
     description: 'Jira username that will be the reporter of issues created when syncing'
     required: true
-#   jira-token:
-#     description: 'Jira token corresponding to the jira-username input with permission to manage issues for the target Jira project'
-#     required: true
+  jira-token:
+    description: 'Jira token corresponding to the jira-username input with permission to manage issues for the target Jira project'
+    required: true
 #   jira-project-key:
 #     description: 'Jira project key where issues will be created'
 #     required: true
-#   jira-host:
-#     description: 'Host of the target Jira instance'
-#     required: true
+  jira-host:
+    description: 'Host of the target Jira instance'
+    required: true
 #   jira-issue-type:
 #     description: 'jira issue type e.g. task, story ...'
 #     required: true

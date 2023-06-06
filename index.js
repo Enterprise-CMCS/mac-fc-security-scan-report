@@ -6,9 +6,9 @@ const github = require('@actions/github');
 try {
    const jira = new JiraClient({
    protocol: 'https',
-   host: process.env.JIRA_BASE_URL,
+   host: core.getInput('jira-host'),
    username: core.getInput('jira-username'),
-   password: process.env.JIRA_API_TOKEN,
+   password: core.getInput('jira-token'),
    apiVersion: '2',
    strictSSL: true,
    });
