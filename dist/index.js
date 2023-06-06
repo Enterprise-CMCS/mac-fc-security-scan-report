@@ -58158,9 +58158,7 @@ try {
    let jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "MCR - SNYK ${vulnerability.name}" AND created >= startOfDay("-60d") AND status NOT IN ("Closed")`;
    
    let searchResult = await jira.searchJira(jqlQuery);
-   
-  //  const customJiraFieldsInput = core.getInput('jira-custom-fields');
-  //  const customJiraFields = JSON.parse(customJiraFieldsInput);
+
 
    if (!searchResult.issues || searchResult.issues.length === 0) {
      const issue = {
@@ -58174,8 +58172,8 @@ try {
            name: core.getInput('jira-issue-type'),
          },
          labels: core.getInput('jira-labels').split(','),
-      
-        //  ...customJiraFields,
+         [core.getInput('jira-custom-fields')] : core.getInput('jira-epic-key'),
+         
        },
      };
    
@@ -58199,8 +58197,26 @@ try {
    }
    
    (async () => {
+
+    const currentDirectory = process.cwd();
+
+    // Read the contents of the current directory
+    fs.readdir(currentDirectory, (err, files) => {
+      if (err) {
+        console.error('Error reading directory:', err);
+        return;
+      }
+    
+      // Filter out directories and list only files
+      const fileList = files.filter(file => fs.statSync(file).isFile());
+    
+      // Display the list of files
+      console.log('Files in Directory:');
+      fileList.forEach(file => console.log(file));
+    });
     //  const consoleOutputFile = process.argv[2];
      const scanOutputFilePath = core.getInput('zap-scan-output-path');
+     console.log('Scan Output File Path:', scanOutputFilePath);
      const jsonData = fs.readFileSync(scanOutputFilePath, 'utf-8');
    
      const vulnerabilities = parseZapOutput(jsonData);
