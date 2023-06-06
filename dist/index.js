@@ -58199,25 +58199,8 @@ try {
    
    (async () => {
 
-    const currentDirectory = process.cwd();
-
-    // Read the contents of the current directory
-    fs.readdir(currentDirectory, (err, files) => {
-      if (err) {
-        console.error('Error reading directory:', err);
-        return;
-      }
-    
-      // Filter out directories and list only files
-      const fileList = files.filter(file => fs.statSync(file).isFile());
-    
-      // Display the list of files
-      console.log('Files in Directory:');
-      fileList.forEach(file => console.log(file));
-    });
     //  const consoleOutputFile = process.argv[2];
      const scanOutputFilePath = core.getInput('zap-scan-output-path');
-     console.log('Scan Output File Path:', scanOutputFilePath);
      const jsonData = fs.readFileSync(scanOutputFilePath, 'utf-8');
    
      const vulnerabilities = parseZapOutput(jsonData);
