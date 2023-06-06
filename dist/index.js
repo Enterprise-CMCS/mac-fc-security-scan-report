@@ -58159,6 +58159,9 @@ try {
    
    let searchResult = await jira.searchJira(jqlQuery);
    
+   const customJiraFieldsInput = core.getInput('jira-custom-fields');
+   const customJiraFields = JSON.parse(customJiraFieldsInput);
+
    if (!searchResult.issues || searchResult.issues.length === 0) {
      const issue = {
        fields: {
@@ -58171,7 +58174,8 @@ try {
            name: core.getInput('jira-issue-type'),
          },
          labels: core.getInput('jira-labels').split(','),
-        //  "core.getInput('jira-custom-fields')": 
+      
+         ...customJiraFields,
        },
      };
    
