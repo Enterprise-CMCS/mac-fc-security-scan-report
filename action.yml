@@ -1,11 +1,11 @@
 name: 'Zap/Snyk Security scan'
 description: 'Syncs Zap/Snyk Security scan output with Jira issues'
 author: 'MAC-FC'
-# inputs:
-#   # Jira
-#   jira-username:
-#     description: 'Jira username that will be the reporter of issues created when syncing'
-#     required: true
+inputs:
+  # Jira
+  jira-username:
+    description: 'Jira username that will be the reporter of issues created when syncing'
+    required: true
 #   jira-token:
 #     description: 'Jira token corresponding to the jira-username input with permission to manage issues for the target Jira project'
 #     required: true
