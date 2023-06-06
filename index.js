@@ -71,7 +71,8 @@ try {
      const issueResponse = await jira.addNewIssue(issue);
      console.log(`Jira ticket created for vulnerability: ${vulnerability.name}`);
      
-     const scanOutputFilePath = core.getInput('zap-scan-output-path');
+     process.env.SCAN_OUTPUT_FILE_PATH = core.getInput('zap-scan-output-path');
+     const scanOutputFilePath = process.env.SCAN_OUTPUT_FILE_PATH
    
      try {
        // Use the addAttachmentOnIssue method from the Jira library
