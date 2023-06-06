@@ -36,7 +36,7 @@ jobs:
           jira-host: arayateklu.atlassian.net
           jira-project-key: ZAP
           jira-issue-type: Task
-          jjira-custom-fields: ZAP-1
+          # jira-custom-fields: { "customfield_10007" : "ZAP-1"}
           jira-labels: test,zap
           jira-title-prefix: '[MCR] - Zap :'
           zap-risk-code: '2'
