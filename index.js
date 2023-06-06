@@ -1,7 +1,6 @@
 const fs = require('fs');
 const JiraClient = require('jira-client');
 const core = require('@actions/core');
-const github = require('@actions/github');
 
 try {
    const jira = new JiraClient({
@@ -66,7 +65,6 @@ try {
        },
      };
    
-     
      const issueResponse = await jira.addNewIssue(issue);
      console.log(`Jira ticket created for vulnerability: ${vulnerability.name}`);
      
