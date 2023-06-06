@@ -1,4 +1,4 @@
-name: 'Zap/Snyk Security scan'
+name: Zap/Snyk Security scan
   push:
     branches:
       - main
