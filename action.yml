@@ -9,32 +9,30 @@ inputs:
   jira-token:
     description: 'Jira token corresponding to the jira-username input with permission to manage issues for the target Jira project'
     required: true
-#   jira-project-key:
-#     description: 'Jira project key where issues will be created'
-#     required: true
+  jira-project-key:
+    description: 'Jira project key where issues will be created'
+    required: true
   jira-host:
     description: 'Host of the target Jira instance'
     required: true
-#   jira-issue-type:
-#     description: 'jira issue type e.g. task, story ...'
-#     required: true
-#   jira-epic-key:
-#     description: 'Jira epic key where issues will be created'
-#     required: false
-#   jira-custom-fields:
-#     description: 'Jira custom field for Jira epic'
-#   jira-labels:
-#     description: 'Jira issue labels'
-#   jira-title-prefix:
-#     description: 'Jira issue title prefix to apply'
+  jira-issue-type:
+    description: 'jira issue type e.g. task, story ...'
+    required: true
+  jira-custom-fields:
+    description: 'JSON string of Jira custom field keys/values, e.g. { "customfield_14117": "example-value" }'
+    required: false
+  jira-labels:
+    description: 'Jira issue labels'
+  jira-title-prefix:
+    description: 'Jira issue title prefix to apply'
 
-# # ZAP
-#   zap-risk-code:
-#     description: 'riskcode type to report'
-#     required: true
-#   zap-scan-output-path:
-#     description: 'the path to zap sacn output'
-#     required: true
+# ZAP
+  zap-risk-code:
+    description: 'riskcode type to report'
+    required: true
+  zap-scan-output-path:
+    description: 'the path to zap sacn output'
+    required: true
 runs:
   using: node16
   main: dist/index.js

@@ -26,7 +26,7 @@ try {
              const { uri, method, param, attack, evidence, otherinfo } = instance;
              instanceDescription += `URI: ${uri}\nMethod: ${method}\nParam: ${param}\nAttack: ${attack}\nEvidence: ${evidence}\nOtherInfo: ${otherinfo}\n\n`;
            }
-             if (alert.riskcode === process.env.ZAP_RISK_CODE ) {
+             if (alert.riskcode === core.getInput('zap-risk-code')) {
                  vulnerabilities.push({
                    name: alert.name.concat(': ', data.site[0]['@host']).replace(/-/g, ''),
                    solution: alert.solution.replace(/<\/?p>/g, ''),
@@ -46,9 +46,8 @@ try {
    
    async function createJiraTicket(vulnerability) {
    
-   // JQL query with relative date math, 
-   //let jqlQuery = `project = "${process.env.JIRA_PROJECT_KEY}" AND summary ~ "${process.env.JIRA_TITLE_PREFIX}  ${title}" AND created >= startOfDay("-60d") AND status NOT IN ("Closed", "Cancelled")`;
-   let jqlQuery = `project = "${process.env.JIRA_PROJECT_KEY}" AND summary ~ "MCR - SNYK ${vulnerability.name}" AND created >= startOfDay("-60d") AND status NOT IN ("Closed")`;
+   
+   let jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "MCR - SNYK ${vulnerability.name}" AND created >= startOfDay("-60d") AND status NOT IN ("Closed")`;
    
    let searchResult = await jira.searchJira(jqlQuery);
    
@@ -56,15 +55,14 @@ try {
      const issue = {
        fields: {
          project: {
-           key: process.env.JIRA_PROJECT_KEY,
+           key: core.getInput('jira-project-key'),
          },
-         summary: process.env.JIRA_TITLE_PREFIX.concat(' ', vulnerability.name),
+         summary: core.getInput('jira-project-key').concat(' ', vulnerability.name),
          description: vulnerability.desc.concat('\n', vulnerability.instanceDesc),
          issuetype: {
-           name: process.env.JIRA_ISSUE_TYPE,
+           name: core.getInput('jira-issue-type'),
          },
-         labels: process.env.JIRA_LABELS.split(','),
-         // "customfield_10007" : process.env.JIRA_EPIC_KEY,
+         labels: core.getInput('jira-labels').split(','),
        },
      };
    
@@ -72,7 +70,7 @@ try {
      const issueResponse = await jira.addNewIssue(issue);
      console.log(`Jira ticket created for vulnerability: ${vulnerability.name}`);
      
-     const scanOutputFilePath = process.env.SCAN_OUTPUT_FILE_PATH;
+     const scanOutputFilePath = core.getInput('zap-scan-output-path');
    
      try {
        // Use the addAttachmentOnIssue method from the Jira library
@@ -90,7 +88,7 @@ try {
    
    (async () => {
     //  const consoleOutputFile = process.argv[2];
-     const scanOutputFilePath = process.env.SCAN_OUTPUT_FILE_PATH;
+     const scanOutputFilePath = core.getInput('zap-scan-output-path');
      const jsonData = fs.readFileSync(scanOutputFilePath, 'utf-8');
    
      const vulnerabilities = parseZapOutput(jsonData);
