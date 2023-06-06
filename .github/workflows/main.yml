@@ -30,6 +30,8 @@ jobs:
 
       - name: Run Jira Ticket Creator
         uses: ./
+        with:
+          jira-username: ${{ secrets.WORKSPACE_EMAIL }}
         env:
           ZAP_RISK_CODE: '2'
           SCAN_OUTPUT_FILE_PATH: 'report_json.json'
@@ -40,5 +42,5 @@ jobs:
           JIRA_TITLE_PREFIX: '[MCR] - Zap :'
           JIRA_BASE_URL: arayateklu.atlassian.net
           JIRA_API_TOKEN: ${{ secrets.API_TOKEN }}
-          JIRA_USER_EMAIL: ${{ secrets.WORKSPACE_EMAIL }}
+          # JIRA_USER_EMAIL: ${{ secrets.WORKSPACE_EMAIL }}
               
