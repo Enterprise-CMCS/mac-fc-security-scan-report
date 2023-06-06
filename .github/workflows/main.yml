@@ -41,6 +41,7 @@ jobs:
           jira-title-prefix: '[MCR] - Zap :'
           zap-risk-code: '2'
           zap-scan-output-path: 'report_json.json'
+          
         # env:
         #   ZAP_RISK_CODE: '2'
         #   SCAN_OUTPUT_FILE_PATH: 'report_json.json'
