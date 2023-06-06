@@ -34,14 +34,21 @@ jobs:
           jira-username: ${{ secrets.WORKSPACE_EMAIL }}
           jira-token: ${{ secrets.API_TOKEN }}
           jira-host: arayateklu.atlassian.net
-        env:
-          ZAP_RISK_CODE: '2'
-          SCAN_OUTPUT_FILE_PATH: 'report_json.json'
-          JIRA_PROJECT_KEY: ZAP
-          JIRA_ISSUE_TYPE: Task
-          JIRA_LABELS: test,zap
-          JIRA_EPIC_KEY: ZAP-1
-          JIRA_TITLE_PREFIX: '[MCR] - Zap :'
+          jira-project-key: ZAP
+          jira-issue-type: Task
+          jjira-custom-fields: ZAP-1
+          jira-labels: test,zap
+          jira-title-prefix: '[MCR] - Zap :'
+          zap-risk-code: '2'
+          zap-scan-output-path: 'report_json.json'
+        # env:
+        #   ZAP_RISK_CODE: '2'
+        #   SCAN_OUTPUT_FILE_PATH: 'report_json.json'
+          # JIRA_PROJECT_KEY: ZAP
+          # JIRA_ISSUE_TYPE: Task
+          # JIRA_LABELS: test,zap
+          # JIRA_EPIC_KEY: ZAP-1
+          # JIRA_TITLE_PREFIX: '[MCR] - Zap :'
           # JIRA_BASE_URL: arayateklu.atlassian.net
           # JIRA_API_TOKEN: ${{ secrets.API_TOKEN }}
           # JIRA_USER_EMAIL: ${{ secrets.WORKSPACE_EMAIL }}
