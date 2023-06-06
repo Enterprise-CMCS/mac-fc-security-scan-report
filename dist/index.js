@@ -58159,8 +58159,8 @@ try {
    
    let searchResult = await jira.searchJira(jqlQuery);
    
-   const customJiraFieldsInput = core.getInput('jira-custom-fields');
-   const customJiraFields = JSON.parse(customJiraFieldsInput);
+  //  const customJiraFieldsInput = core.getInput('jira-custom-fields');
+  //  const customJiraFields = JSON.parse(customJiraFieldsInput);
 
    if (!searchResult.issues || searchResult.issues.length === 0) {
      const issue = {
@@ -58175,7 +58175,7 @@ try {
          },
          labels: core.getInput('jira-labels').split(','),
       
-         ...customJiraFields,
+        //  ...customJiraFields,
        },
      };
    
