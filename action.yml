@@ -12,6 +12,9 @@ inputs:
   jira-project-key:
     description: 'Jira project key where issues will be created'
     required: true
+  jira-epic-key:
+    description: 'Jira project epic key where issues will be created'
+    required: false
   jira-host:
     description: 'Host of the target Jira instance'
     required: true

@@ -36,12 +36,13 @@ jobs:
           jira-host: arayateklu.atlassian.net
           jira-project-key: ZAP
           jira-issue-type: Task
-          # jira-custom-fields: { "customfield_10007" : "ZAP-1"}
+          # jira-epic-key: 
+          # jira-custom-fields: 
           jira-labels: test,zap
           jira-title-prefix: '[MCR] - Zap :'
           zap-risk-code: '2'
           zap-scan-output-path: 'report_json.json'
-          
+
         # env:
         #   ZAP_RISK_CODE: '2'
         #   SCAN_OUTPUT_FILE_PATH: 'report_json.json'

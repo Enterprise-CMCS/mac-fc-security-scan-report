@@ -49,9 +49,7 @@ try {
    let jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "MCR - SNYK ${vulnerability.name}" AND created >= startOfDay("-60d") AND status NOT IN ("Closed")`;
    
    let searchResult = await jira.searchJira(jqlQuery);
-   
-  //  const customJiraFieldsInput = core.getInput('jira-custom-fields');
-  //  const customJiraFields = JSON.parse(customJiraFieldsInput);
+
 
    if (!searchResult.issues || searchResult.issues.length === 0) {
      const issue = {
@@ -65,8 +63,8 @@ try {
            name: core.getInput('jira-issue-type'),
          },
          labels: core.getInput('jira-labels').split(','),
-      
-        //  ...customJiraFields,
+         [core.getInput('jira-custom-fields')] : core.getInput('jira-epic-key'),
+         
        },
      };
    
