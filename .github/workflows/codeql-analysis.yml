@@ -32,11 +32,11 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: codeql-results
-        path: results/javascript.sarif
+        path: home/runner/work/macfc-security-scan-report/results/javascript.sarif
 
     - name: Convert SARIF to CSV
       run: |
-        codeql bqrs decode --format=csv -o codeql-results.csv results/javascript.sarif
+        codeql bqrs decode --format=csv -o codeql-results.csv home/runner/work/macfc-security-scan-report/results/javascript.sarif
 
     - name: Upload CodeQL Analysis CSV
       uses: actions/upload-artifact@v2
