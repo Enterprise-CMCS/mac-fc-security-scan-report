@@ -32,11 +32,11 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: codeql-results
-        path: ${{ github.workspace }}/codeql-sarif
+        path: results/javascript.sarif
 
     - name: Convert SARIF to CSV
       run: |
-        codeql bqrs decode --format=csv -o codeql-results.csv ${{ github.workspace }}/codeql-sarif/codeql-bqrs.sarif
+        codeql bqrs decode --format=csv -o codeql-results.csv results/javascript.sarif
 
     - name: Upload CodeQL Analysis CSV
       uses: actions/upload-artifact@v2
