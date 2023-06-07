@@ -35,7 +35,8 @@ jobs:
           jira-project-key: ZAP
           jira-issue-type: Task
           # jira-epic-key: 
-          # jira-custom-fields: 
+          # jira-custom-fields:
+          # jira-custom-field-key-value:
           jira-labels: test,zap
           jira-title-prefix: '[MCR] - Zap :'
           zap-risk-code: '2'

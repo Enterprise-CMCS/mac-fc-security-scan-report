@@ -52,6 +52,9 @@ try {
 
 
    if (!searchResult.issues || searchResult.issues.length === 0) {
+    const customJiraFields = {
+      customFieldName: core.getInput('jira-custom-field-key-value'),
+    };
      const issue = {
        fields: {
          project: {
@@ -63,7 +66,8 @@ try {
            name: core.getInput('jira-issue-type'),
          },
          labels: core.getInput('jira-labels').split(','),
-         [core.getInput('jira-custom-fields')] : core.getInput('jira-epic-key'),
+        //  [core.getInput('jira-custom-fields')] : core.getInput('jira-epic-key'),
+         ...customJiraFields,
          
        },
      };

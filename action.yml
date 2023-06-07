@@ -24,6 +24,9 @@ inputs:
   jira-custom-fields:
     description: 'JSON string of Jira custom field keys/values, e.g. { "customfield_14117": "example-value" }'
     required: false
+  jira-custom-field-key-value:
+    description: 'JSON string of Jira custom field keys/values, e.g. { "customfield_14117": "example-value" }'
+    required: false
   jira-labels:
     description: 'Jira issue labels'
   jira-title-prefix:
