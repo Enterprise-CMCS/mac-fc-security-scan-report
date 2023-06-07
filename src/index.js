@@ -67,7 +67,6 @@ try {
            name: core.getInput('jira-issue-type'),
          },
          labels: core.getInput('jira-labels').split(','),
-        //  [core.getInput('jira-custom-fields')] : core.getInput('jira-epic-key'),
          ...customJiraFields,
          
        },
