@@ -12,18 +12,12 @@ inputs:
   jira-project-key:
     description: 'Jira project key where issues will be created'
     required: true
-  jira-epic-key:
-    description: 'Jira project epic key where issues will be created'
-    required: false
   jira-host:
     description: 'Host of the target Jira instance'
     required: true
   jira-issue-type:
     description: 'jira issue type e.g. task, story ...'
     required: true
-  jira-custom-fields:
-    description: 'JSON string of Jira custom field keys/values, e.g. { "customfield_14117": "example-value" }'
-    required: false
   jira-custom-field-key-value:
     description: 'JSON string of Jira custom field keys/values, e.g. { "customfield_14117": "example-value" }'
     required: false
