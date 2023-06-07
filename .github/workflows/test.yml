@@ -13,7 +13,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: 16
+          node-version: 18
 
       - name: OWASP ZAP Baseline Scan
         continue-on-error: true
@@ -24,9 +24,7 @@ jobs:
       - name: Install Jira library and packages for Node.js
         run: |
             npm install jira-client
-            npm install request-promise
             npm install @actions/core
-            npm install @actions/github
 
       - name: Run Jira Ticket Creator
         uses: ./
@@ -42,16 +40,4 @@ jobs:
           jira-title-prefix: '[MCR] - Zap :'
           zap-risk-code: '2'
           zap-scan-output-path: 'report_json.json'
-
-        # env:
-        #   ZAP_RISK_CODE: '2'
-        #   SCAN_OUTPUT_FILE_PATH: 'report_json.json'
-          # JIRA_PROJECT_KEY: ZAP
-          # JIRA_ISSUE_TYPE: Task
-          # JIRA_LABELS: test,zap
-          # JIRA_EPIC_KEY: ZAP-1
-          # JIRA_TITLE_PREFIX: '[MCR] - Zap :'
-          # JIRA_BASE_URL: arayateklu.atlassian.net
-          # JIRA_API_TOKEN: ${{ secrets.API_TOKEN }}
-          # JIRA_USER_EMAIL: ${{ secrets.WORKSPACE_EMAIL }}
               
