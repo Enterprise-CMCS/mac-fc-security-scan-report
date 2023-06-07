@@ -27,3 +27,21 @@ jobs:
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
+
+    - name: Upload CodeQL Analysis Results
+        uses: actions/upload-artifact@v2
+        with:
+          name: codeql-results
+          path: ${{ github.workspace }}/codeql-sarif
+
+    - name: Convert SARIF to CSV
+      run: |
+        codeql bqrs decode --format=csv -o codeql-results.csv ${{ github.workspace }}/codeql-sarif/codeql-bqrs.sarif
+
+    - name: Upload CodeQL Analysis CSV
+      uses: actions/upload-artifact@v2
+      with:
+        name: codeql-analysis-csv
+        path: codeql-results.csv
+      
+    
