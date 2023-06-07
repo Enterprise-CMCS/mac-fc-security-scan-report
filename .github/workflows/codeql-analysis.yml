@@ -28,20 +28,9 @@ jobs:
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
 
-    - name: Upload CodeQL Analysis Results
-      uses: actions/upload-artifact@v2
-      with:
-        name: codeql-results
-        path: home/runner/work/macfc-security-scan-report/results/javascript.sarif
-
-    - name: Convert SARIF to CSV
+    - name: list directory content 
       run: |
-        codeql bqrs decode --format=csv -o codeql-results.csv home/runner/work/macfc-security-scan-report/results/javascript.sarif
+        pwd
+        ls
 
-    - name: Upload CodeQL Analysis CSV
-      uses: actions/upload-artifact@v2
-      with:
-        name: codeql-analysis-csv
-        path: codeql-results.csv
-      
     
