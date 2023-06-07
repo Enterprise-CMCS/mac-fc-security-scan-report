@@ -58170,7 +58170,7 @@ try {
          project: {
            key: core.getInput('jira-project-key'),
          },
-         summary: core.getInput('jira-project-key').concat(' ', vulnerability.name),
+         summary: core.getInput('jira-title-prefix').concat(' ', vulnerability.name),
          description: vulnerability.desc.concat('\n', vulnerability.instanceDesc),
          issuetype: {
            name: core.getInput('jira-issue-type'),
