@@ -58161,9 +58161,10 @@ try {
 
 
    if (!searchResult.issues || searchResult.issues.length === 0) {
-    const customJiraFields = {
-      customFieldName: core.getInput('jira-custom-field-key-value'),
-    };
+     const customFieldKeyValue = JSON.parse(core.getInput('jira-custom-field-key-value'));
+     const customJiraFields = {
+       ...customFieldKeyValue,
+     };
      const issue = {
        fields: {
          project: {
