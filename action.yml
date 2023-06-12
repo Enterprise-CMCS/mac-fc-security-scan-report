@@ -26,13 +26,16 @@ inputs:
   jira-title-prefix:
     description: 'Jira issue title prefix to apply'
 
-# ZAP
+# Scan
   zap-risk-code:
     description: 'riskcode type to report'
     required: true
-  zap-scan-output-path:
+  scan-output-path:
     description: 'the path to zap sacn output'
     required: true
+  scan-type:
+    description: 'can type to perform "snyk" or "zap"'
+    required: true 
 runs:
   using: node16
   main: dist/index.js
