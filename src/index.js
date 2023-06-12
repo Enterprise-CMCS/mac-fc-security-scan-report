@@ -27,7 +27,7 @@ try {
                const { uri, method, param, attack, evidence, otherinfo } = instance;
                instanceDescription += `URI: ${uri}\nMethod: ${method}\nParam: ${param}\nAttack: ${attack}\nEvidence: ${evidence}\nOtherInfo: ${otherinfo}\n\n`;
              }
-               if (alert.riskcode === core.getInput('zap-risk-code')) {
+               if (alert.riskcode >= parseInt(core.getInput('zap-risk-code'))) {
                    vulnerabilities.push({
                      name: alert.name.concat(': ', data.site[0]['@host']).replace(/-/g, ''),
                      solution: alert.solution.replace(/<\/?p>/g, ''),
