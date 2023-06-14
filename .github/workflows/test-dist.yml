@@ -25,7 +25,9 @@ jobs:
         run: npm install
 
       - name: Build distribution
-        run: ncc build index.js --license licenses.txt --out-dir temp
+        run: |
+          npm install -g @vercel/ncc
+          ncc build index.js --license licenses.txt --out-dir temp
 
       - name: Check file sync
         run: |
