@@ -4,7 +4,7 @@ This GitHub Action script is designed to create Jira tickets for vulnerabilities
 # Inputs
 The script expects the following inputs:
 
-jira-host: The host URL of your Jira instance.<br />
+**'jira-host:'** The host URL of your Jira instance.<br />
 jira-username: The username used to authenticate with Jira.<br />
 jira-token: The token or password used to authenticate with Jira.<br />
 scan-type: The type of scan to process. Supported values: "zap" or "snyk".<br />
