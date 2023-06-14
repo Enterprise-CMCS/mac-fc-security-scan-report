@@ -3,8 +3,6 @@ This GitHub Action script is designed to create Jira tickets for vulnerabilities
 
 # Inputs
 
-The following inputs are required for the script to run:
-
 jira-host: The hostname of the Jira instance.
 
 jira-username: The username for authenticating with the Jira instance.
@@ -26,6 +24,7 @@ jira-labels: Comma-separated labels to be added to the Jira tickets.
 jira-custom-field-key-value: A JSON string representing custom field key-value pairs to be set on the Jira tickets.
 
 scan-output-path: The path to the output file of the security scan.
+
 
 # Usage
 
