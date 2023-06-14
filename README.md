@@ -3,7 +3,7 @@ This GitHub Action script is designed to create Jira tickets for vulnerabilities
 
 # Inputs
 The script expects the following inputs:
-
+<pre>
 **jira-host:**   The host URL of your Jira instance.<br />
 **jira-username:**   The username used to authenticate with Jira.<br />
 **jira-token:**   The token or password used to authenticate with Jira.<br />
@@ -15,7 +15,7 @@ The script expects the following inputs:
 **jira-labels:**   Labels to be applied to the created Jira tickets (comma-separated).<br />
 **jira-custom-field-key-value:**   A JSON string containing key-value pairs of custom fields and their values in Jira.<br />
 **scan-output-path:**   The path to the scan output file.<br />
-
+</pre>
 # Usage
 
 To use this GitHub Action script, you can create a workflow file (e.g., .github/workflows/security-scan.yml) in your repository with the following content:
