@@ -5,16 +5,16 @@ This GitHub Action script is designed to create Jira tickets for vulnerabilities
 The script expects the following inputs:
 
 **jira-host:** The host URL of your Jira instance.<br />
-jira-username: The username used to authenticate with Jira.<br />
-jira-token: The token or password used to authenticate with Jira.<br />
-scan-type: The type of scan to process. Supported values: "zap" or "snyk".<br />
-zap-risk-code (only for Zap scan): The minimum risk code for vulnerabilities to be considered.<br />
-jira-project-key: The Jira project key where the tickets will be created.<br />
-jira-title-prefix: The prefix to be added to the Jira ticket summary.<br />
-jira-issue-type: The Jira issue type for the created tickets.<br />
-jira-labels: Labels to be applied to the created Jira tickets (comma-separated).<br />
-jira-custom-field-key-value: A JSON string containing key-value pairs of custom fields and their values in Jira.<br />
-scan-output-path: The path to the scan output file.<br />
+**jira-username:** The username used to authenticate with Jira.<br />
+**jira-token:** The token or password used to authenticate with Jira.<br />
+**scan-type:** The type of scan to process. Supported values: "zap" or "snyk".<br />
+**zap-risk-code (only for Zap scan):** The minimum risk code for vulnerabilities to be considered.<br />
+**jira-project-key:** The Jira project key where the tickets will be created.<br />
+**jira-title-prefix:** The prefix to be added to the Jira ticket summary.<br />
+**jira-issue-type:** The Jira issue type for the created tickets.<br />
+**jira-labels:** Labels to be applied to the created Jira tickets (comma-separated).<br />
+**jira-custom-field-key-value:** A JSON string containing key-value pairs of custom fields and their values in Jira.<br />
+**scan-output-path:** The path to the scan output file.<br />
 
 # Usage
 
