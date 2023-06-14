@@ -1,7 +1,8 @@
 # macfc-security-scan-report
 This GitHub Action script is designed to create Jira tickets for vulnerabilities detected during security scans. It supports two types of scans: Zap and Snyk. The script parses the scan output, identifies vulnerabilities, and creates Jira tickets for each unique vulnerability found.
 
-Inputs
+# Inputs
+
 The following inputs are required for the script to run:
 
 jira-host: The hostname of the Jira instance.
@@ -26,7 +27,8 @@ jira-custom-field-key-value: A JSON string representing custom field key-value p
 
 scan-output-path: The path to the output file of the security scan.
 
-Usage
+# Usage
+
 To use this GitHub Action script, you can create a workflow file (e.g., .github/workflows/security-scan.yml) in your repository with the following content:
 
 name: Security Scan
@@ -49,7 +51,7 @@ jobs:
         run: your-scan-command > scan-output.json
       
       - name: Create Jira tickets
-        uses: your-username/your-repo@your-tag
+        uses: Enterprise-CMCS/security-hub-visibility@v1.0.1
         with:
           jira-host: ${{ secrets.JIRA_HOST }}
           jira-username: ${{ secrets.JIRA_USERNAME }}
@@ -62,8 +64,6 @@ jobs:
           jira-labels: security, vulnerability  # customize as needed
           jira-custom-field-key-value: '{"customFieldKey": "customValue"}'  # customize as needed
           scan-output-path: scan-output.json
-
-Make sure to replace your-username/your-repo@your-tag with the actual GitHub repository and tag where your Action script is located.
 
 Ensure that you have the required secrets (JIRA_HOST, JIRA_USERNAME, and JIRA_TOKEN) configured in your repository's settings so that they can be accessed by the Action script.
 
