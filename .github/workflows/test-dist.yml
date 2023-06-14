@@ -31,7 +31,7 @@ jobs:
 
       - name: Check file sync
         run: |
-          ls
+          ls temp/
           diff -q temp/index.js dist/index.js
           exit_code=$?
 
