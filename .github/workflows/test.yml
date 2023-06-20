@@ -6,7 +6,7 @@ on:
       - update
   pull_request:
     branches: [ main ]
-    
+
 jobs:
   create_ticket:
     runs-on: ubuntu-latest
@@ -39,7 +39,7 @@ jobs:
           jira-project-key: ZAP
           jira-issue-type: Task
           jira-labels: test,zap
-          jira-title-prefix: '[MCR] - Zap : '
+          jira-title-prefix: '[MACFC] - Zap : '
           zap-risk-code: '2'
           scan-output-path: 'report_json.json'
           scan-type: 'zap'    
