@@ -52,7 +52,7 @@ try {
        process.env.JIRA_TITLE_PREFIX = core.getInput('jira-title-prefix');
        process.env.JIRA_ISSUE_TYPE = core.getInput('jira-issue-type');
        process.env.JIRA_LABELS = core.getInput('jira-labels');
-       
+
        let jqlQuery = `project = "${process.env.JIRA_PROJECT_KEY}" AND summary ~ "MCR - SNYK ${vulnerability.name}" AND created >= startOfDay("-60d") AND status NOT IN ("Closed")`;
        let searchResult = await jira.searchJira(jqlQuery);
     
@@ -72,7 +72,7 @@ try {
                name: process.env.JIRA_ISSUE_TYPE,
              },
              labels: process.env.JIRA_LABELS.split(','),
-             ...customJiraFields,
+             ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
              
            },
          };
@@ -178,7 +178,7 @@ try {
                name: core.getInput('jira-issue-type'),
              },
              labels: core.getInput('jira-labels').split(','),
-             ...customJiraFields,
+             ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
            },
          };
      
