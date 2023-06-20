@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - remove-node-module
+  pull_request:
+    branches: [ main ]
 jobs:
   create_ticket:
     runs-on: ubuntu-latest
@@ -20,7 +22,7 @@ jobs:
         continue-on-error: true
         uses: zaproxy/action-baseline@v0.3.0
         with:
-          target: "https://d37uopclgv3e6p.cloudfront.net/"
+          target: "https://www.zaproxy.org/"
 
       - name: Install Jira library and packages for Node.js
         run: |
@@ -35,9 +37,8 @@ jobs:
           jira-host: arayateklu.atlassian.net
           jira-project-key: ZAP
           jira-issue-type: Task
-          # jira-custom-field-key-value:
           jira-labels: test,zap
-          jira-title-prefix: '[MCR] - Zap :'
+          jira-title-prefix: '[MCFC] - Zap :'
           zap-risk-code: '2'
           scan-output-path: 'report_json.json'
           scan-type: 'zap'
