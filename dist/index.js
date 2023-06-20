@@ -58156,7 +58156,11 @@ try {
      
      async function createJiraTicket(vulnerability) {
     
+    //  let jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${core.getInput('jira-title-prefix').concat(' ', vulnerability.name)}" AND created >= startOfDay("-60d") AND status NOT IN ("Closed")`;
+    //  let searchResult = await jira.searchJira(jqlQuery);
+
      let jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${core.getInput('jira-title-prefix').concat(' ', vulnerability.name)}" AND created >= startOfDay("-60d") AND status NOT IN ("Closed")`;
+     console.log('JQL Query:', jqlQuery); // Print the JQL query
      let searchResult = await jira.searchJira(jqlQuery);
       
      if (!searchResult.issues || searchResult.issues.length === 0) {
