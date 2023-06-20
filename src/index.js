@@ -57,10 +57,10 @@ try {
        let searchResult = await jira.searchJira(jqlQuery);
     
        if (!searchResult.issues || searchResult.issues.length === 0) {
-         const customFieldKeyValue = JSON.parse(process.env.JIRA_CUSTOM_FIELD_KEY_VALUE);
-         const customJiraFields = {
-           ...customFieldKeyValue,
-         };
+        //  
+         const customFieldKeyValue = process.env.JIRA_CUSTOM_FIELD_KEY_VALUE ? JSON.parse(process.env.JIRA_CUSTOM_FIELD_KEY_VALUE) : null;
+         const customJiraFields = customFieldKeyValue ? { ...customFieldKeyValue } : null;
+        
          const issue = {
            fields: {
              project: {
@@ -163,10 +163,14 @@ try {
        let searchResult = await jira.searchJira(jqlQuery);
      
        if (!searchResult.issues || searchResult.issues.length === 0) {
-         const customFieldKeyValue = JSON.parse(core.getInput('jira-custom-field-key-value'));
-         const customJiraFields = {
-           ...customFieldKeyValue,
-         };
+        //  const customFieldKeyValue = JSON.parse(core.getInput('jira-custom-field-key-value'));
+        //  const customJiraFields = {
+        //    ...customFieldKeyValue,
+        //  };
+        
+         const customFieldKeyValue = process.env.JIRA_CUSTOM_FIELD_KEY_VALUE ? JSON.parse(process.env.JIRA_CUSTOM_FIELD_KEY_VALUE) : null;
+         const customJiraFields = customFieldKeyValue ? { ...customFieldKeyValue } : null;
+        
          const issue = {
            fields: {
              project: {
