@@ -47,26 +47,31 @@ try {
       }
      
      async function createJiraTicket(vulnerability) {
-    
-       let jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "MCR - SNYK ${vulnerability.name}" AND created >= startOfDay("-60d") AND status NOT IN ("Closed")`;
+       process.env.JIRA_PROJECT_KEY = core.getInput('jira-project-key');
+       process.env.JIRA_CUSTOM_FIELD_KEY_VALUE = core.getInput('jira-custom-field-key-value');
+       process.env.JIRA_TITLE_PREFIX = core.getInput('jira-title-prefix');
+       process.env.JIRA_ISSUE_TYPE = core.getInput('jira-issue-type');
+       process.env.JIRA_LABELS = core.getInput('jira-labels');
+       
+       let jqlQuery = `project = "${process.env.JIRA_PROJECT_KEY}" AND summary ~ "MCR - SNYK ${vulnerability.name}" AND created >= startOfDay("-60d") AND status NOT IN ("Closed")`;
        let searchResult = await jira.searchJira(jqlQuery);
     
        if (!searchResult.issues || searchResult.issues.length === 0) {
-         const customFieldKeyValue = JSON.parse(core.getInput('jira-custom-field-key-value'));
+         const customFieldKeyValue = JSON.parse(process.env.JIRA_CUSTOM_FIELD_KEY_VALUE);
          const customJiraFields = {
            ...customFieldKeyValue,
          };
          const issue = {
            fields: {
              project: {
-               key: core.getInput('jira-project-key'),
+               key: process.env.JIRA_PROJECT_KEY,
              },
-             summary: core.getInput('jira-title-prefix').concat(' ', vulnerability.name),
+             summary: process.env.JIRA_TITLE_PREFIX.concat(' ', vulnerability.name),
              description: vulnerability.desc.concat('\n', vulnerability.instanceDesc),
              issuetype: {
-               name: core.getInput('jira-issue-type'),
+               name: process.env.JIRA_ISSUE_TYPE,
              },
-             labels: core.getInput('jira-labels').split(','),
+             labels: process.env.JIRA_LABELS.split(','),
              ...customJiraFields,
              
            },
