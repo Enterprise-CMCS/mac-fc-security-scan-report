@@ -3,6 +3,9 @@ on:
   push:
     branches:
       - main
+      - update
+  pull_request:
+    branches: [ main ]
 jobs:
   create_ticket:
     runs-on: ubuntu-latest
