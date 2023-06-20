@@ -50,7 +50,7 @@ try {
     //  let jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${core.getInput('jira-title-prefix').concat(' ', vulnerability.name)}" AND created >= startOfDay("-60d") AND status NOT IN ("Closed")`;
     //  let searchResult = await jira.searchJira(jqlQuery);
 
-     let jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${core.getInput('jira-title-prefix').concat(' ', vulnerability.name)}" AND created >= startOfDay("-60d") AND status NOT IN ("Closed")`;
+     let jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${vulnerability.name}" AND created >= startOfDay("-60d") AND status NOT IN ("Closed")`;
      let searchResult = await jira.searchJira(jqlQuery);
       
      if (!searchResult.issues || searchResult.issues.length === 0) {
@@ -154,7 +154,6 @@ try {
        // JQL query with relative date math, status conditions. 
        const title = vulnerability.title.replaceAll("\"", "\\\"");
        let jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "MCR - SNYK ${vulnerability.title}" AND created >= startOfDay("-60d") AND status NOT IN ("Closed", "Cancelled")`;
-     
        let searchResult = await jira.searchJira(jqlQuery);
      
        if (!searchResult.issues || searchResult.issues.length === 0) {
