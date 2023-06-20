@@ -2,7 +2,7 @@ name: Jira Ticket Creation Workflow
 on:
   push:
     branches:
-      - remove-node-module
+      - main
   pull_request:
     branches: [ main ]
 jobs:
