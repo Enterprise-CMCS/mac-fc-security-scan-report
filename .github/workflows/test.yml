@@ -39,7 +39,7 @@ jobs:
           jira-issue-type: Task
           jira-labels: test,zap
           jira-title-prefix: '[MCR] - Zap :'
-          zap-risk-code: '3'
+          zap-risk-code: '2'
           scan-output-path: 'report_json.json'
           scan-type: 'zap'
               
