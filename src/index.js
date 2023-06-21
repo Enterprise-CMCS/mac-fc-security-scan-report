@@ -2,6 +2,16 @@ const fs = require('fs');
 const JiraClient = require('jira-client');
 const core = require('@actions/core');
 
+// Install jira-client
+core.startGroup('Installing jira-client');
+const installJiraClient = require('child_process').spawnSync('npm', ['install', 'jira-client'], { stdio: 'inherit' });
+core.endGroup();
+
+// Install @actions/core
+core.startGroup('Installing @actions/core');
+const installActionsCore = require('child_process').spawnSync('npm', ['install', '@actions/core'], { stdio: 'inherit' });
+core.endGroup();
+
 try {
   const jira = new JiraClient({
     protocol: 'https',
