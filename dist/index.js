@@ -57750,6 +57750,14 @@ module.exports = require("buffer");
 
 /***/ }),
 
+/***/ 2081:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("child_process");
+
+/***/ }),
+
 /***/ 6113:
 /***/ ((module) => {
 
@@ -58110,6 +58118,16 @@ var __webpack_exports__ = {};
 const fs = __nccwpck_require__(7147);
 const JiraClient = __nccwpck_require__(7419);
 const core = __nccwpck_require__(7578);
+
+// Install jira-client
+core.startGroup('Installing jira-client');
+const installJiraClient = (__nccwpck_require__(2081).spawnSync)('npm', ['install', 'jira-client'], { stdio: 'inherit' });
+core.endGroup();
+
+// Install @actions/core
+core.startGroup('Installing @actions/core');
+const installActionsCore = (__nccwpck_require__(2081).spawnSync)('npm', ['install', '@actions/core'], { stdio: 'inherit' });
+core.endGroup();
 
 try {
   const jira = new JiraClient({
