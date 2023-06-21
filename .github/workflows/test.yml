@@ -21,14 +21,9 @@ jobs:
 
       - name: OWASP ZAP Baseline Scan
         continue-on-error: true
-        uses: zaproxy/action-baseline@v0.3.0
+        uses: zaproxy/action-baseline@v0.7.0
         with:
           target: "https://www.zaproxy.org/"
-
-      - name: Install Jira library and packages for Node.js
-        run: |
-            npm install jira-client
-            npm install @actions/core
 
       - name: Run Jira Ticket Creator
         uses: ./
