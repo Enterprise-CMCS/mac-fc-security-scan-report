@@ -40,7 +40,7 @@ jobs:
         run: your-scan-command > scan-output.json
       
       - name: Create Jira tickets
-        uses: Enterprise-CMCS/security-hub-visibility@v1.0.1
+        uses: Enterprise-CMCS/security-hub-visibility@v1.0.2
         with:
           jira-host: ${{ secrets.JIRA_HOST }}
           jira-username: ${{ secrets.JIRA_USERNAME }}
