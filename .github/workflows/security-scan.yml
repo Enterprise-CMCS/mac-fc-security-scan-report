@@ -1,0 +1,33 @@
+name: Security Scan
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
+      - name: Run security scan
+        # Replace `your-scan-command` with the command to run your security scan
+        run: zap > scan-output.json
+      
+      - name: Create Jira tickets
+        uses: Enterprise-CMCS/security-hub-visibility@v1.0.1
+        with:
+          jira-host: ${{ secrets.JIRA_HOST }}
+          jira-username: ${{ secrets.JIRA_USERNAME }}
+          jira-token: ${{ secrets.JIRA_TOKEN }}
+          scan-type: zap  # or snyk
+          zap-risk-code: 2  # (optional, only for Zap scans)
+          jira-project-key: CMCSMACD  # replace with your project key
+          jira-title-prefix: "Security Vulnerability -"  # customize as needed
+          jira-issue-type: Bug  # customize as needed
+          jira-labels: security, vulnerability  # customize as needed
+          jira-custom-field-key-value: '{"customFieldKey": "customValue"}'  # customize as needed
+          scan-output-path: scan-output.json
