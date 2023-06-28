@@ -3,7 +3,7 @@ description: 'Syncs Zap/Snyk Security scan output with Jira issues'
 author: 'MAC-FC'
 inputs:
   # Jira
-  jira-username:
+  jira-usname:
     description: 'Jira username that will be the reporter of issues created when syncing'
     required: true
   jira-token:
