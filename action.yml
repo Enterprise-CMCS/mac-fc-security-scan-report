@@ -4,7 +4,7 @@ author: 'MAC-FC'
 inputs:
   # Jira
   jira-usname:
-    description: 'Jira username that will be the reporter of issues created when syncing'
+    desption: 'Jira username that will be the reporter of issues created when syncing'
     required: true
   jira-token:
     description: 'Jira token corresponding to the jira-username input with permission to manage issues for the target Jira project'
