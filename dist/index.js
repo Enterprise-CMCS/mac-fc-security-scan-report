@@ -58177,7 +58177,7 @@ try {
       let searchResult = await jira.searchJira(jqlQuery);
 
       if (!searchResult.issues || searchResult.issues.length === 0) {
-        const customFieldKeyValue = process.env.JIRA_CUSTOM_FIELD_KEY_VALUE ? JSON.parse(process.env.JIRA_CUSTOM_FIELD_KEY_VALUE) : null;
+        const customFieldKeyValue = core.getInput('jira-custom-field-key-value') ? JSON.parse(core.getInput('jira-custom-field-key-value')) : null;
         const customJiraFields = customFieldKeyValue ? { ...customFieldKeyValue } : null;
         const issue = {
           fields: {
@@ -58276,7 +58276,7 @@ try {
       let searchResult = await jira.searchJira(jqlQuery);
 
       if (!searchResult.issues || searchResult.issues.length === 0) {
-        const customFieldKeyValue = process.env.JIRA_CUSTOM_FIELD_KEY_VALUE ? JSON.parse(process.env.JIRA_CUSTOM_FIELD_KEY_VALUE) : null;
+        const customFieldKeyValue = core.getInput('jira-custom-field-key-value') ? JSON.parse(core.getInput('jira-custom-field-key-value')) : null;
         const customJiraFields = customFieldKeyValue ? { ...customFieldKeyValue } : null;
 
         const issue = {
