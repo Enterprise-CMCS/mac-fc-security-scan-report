@@ -1,6 +1,8 @@
 const fs = require('fs');
 const JiraClient = require('jira-client');
 const core = require('@actions/core');
+const fetch = require('node-fetch');
+
 
 // Install jira-client
 core.startGroup('Installing jira-client');
