@@ -25,7 +25,9 @@ inputs:
     description: 'Jira issue labels'
   jira-title-prefix:
     description: 'Jira issue title prefix to apply'
-
+  assign-jira-ticket-to:
+    description: 'the assignee accountId to assign the Jira ticket to}'
+    required: false
 # Scan
   zap-risk-code:
     description: 'riskcode type to report'
