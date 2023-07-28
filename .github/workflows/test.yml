@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - add-assignee
   pull_request:
     branches: [ main ]
 
