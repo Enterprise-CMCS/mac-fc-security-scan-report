@@ -1,6 +1,8 @@
 const fs = require('fs');
 const JiraClient = require('jira-client');
 const core = require('@actions/core');
+const fetch = require('node-fetch');
+
 
 // Install jira-client
 core.startGroup('Installing jira-client');
@@ -11,6 +13,42 @@ core.endGroup();
 core.startGroup('Installing @actions/core');
 const installActionsCore = require('child_process').spawnSync('npm', ['install', '@actions/core'], { stdio: 'inherit' });
 core.endGroup();
+
+// Install node-fetch
+core.startGroup('Installing node-fetch');
+const nodefetch = require('child_process').spawnSync('npm', ['install', 'node-fetch'], { stdio: 'inherit' });
+core.endGroup();
+
+// Function to check if the user exists using the Jira REST API
+async function doesUserExist(accountId) {
+  try {
+    const username = core.getInput('jira-username');
+    const token = core.getInput('jira-token'); 
+    const response = await fetch(`https://${core.getInput('jira-host')}/rest/api/3/user?accountId=${accountId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Basic ${Buffer.from(
+          `${username}:${token}`
+        ).toString('base64')}`,
+        'Accept': 'application/json'
+      }
+    });
+
+    if (response.status === 200) {
+      // User exists (status code 200 OK)
+      return true;
+    } else if (response.status === 404) {
+      // User does not exist (status code 404 Not Found)
+      return false;
+    } else {
+      // Handle other response statuses if needed
+      throw new Error(`Unexpected response status: ${response.status} ${response.statusText}`);
+    }
+  } catch (err) {
+    console.error(err);
+    return false; // Return false if there was an error during the HTTP request
+  }
+}
 
 try {
   const jira = new JiraClient({
@@ -62,6 +100,10 @@ try {
       if (!searchResult.issues || searchResult.issues.length === 0) {
         const customFieldKeyValue = core.getInput('jira-custom-field-key-value') ? JSON.parse(core.getInput('jira-custom-field-key-value')) : null;
         const customJiraFields = customFieldKeyValue ? { ...customFieldKeyValue } : null;
+
+        const accountId = core.getInput('assign-jira-ticket-to');
+        const assignee = await doesUserExist(accountId).catch(() => null)
+
         const issue = {
           fields: {
             project: {
@@ -71,6 +113,9 @@ try {
             description: vulnerability.desc.concat('\n', vulnerability.instanceDesc),
             issuetype: {
               name: core.getInput('jira-issue-type'),
+            },
+            assignee: {
+              accountId: assignee ? accountId : null,
             },
             labels: core.getInput('jira-labels').split(','),
             ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
@@ -162,6 +207,9 @@ try {
         const customFieldKeyValue = core.getInput('jira-custom-field-key-value') ? JSON.parse(core.getInput('jira-custom-field-key-value')) : null;
         const customJiraFields = customFieldKeyValue ? { ...customFieldKeyValue } : null;
 
+        const accountId = core.getInput('assign-jira-ticket-to');
+        const assignee = await doesUserExist(accountId).catch(() => null)
+
         const issue = {
           fields: {
             project: {
@@ -171,6 +219,9 @@ try {
             description: vulnerability.description,
             issuetype: {
               name: core.getInput('jira-issue-type'),
+            },
+            assignee: {
+              accountId: assignee ? accountId : null,
             },
             labels: core.getInput('jira-labels').split(','),
             ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
