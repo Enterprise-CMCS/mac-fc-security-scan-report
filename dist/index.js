@@ -62343,6 +62343,8 @@ try {
       const vulnerabilities = parseSnykOutput(jsonData);
       console.log(`Parsed vulnerabilities: ${vulnerabilities.length}`);
 
+      console.log(vulnerabilities);
+
       const uniqueVulnerabilities = Array.from(new Set(vulnerabilities.map(v => v.title)))
         .map(title => {
           return vulnerabilities.find(v => v.title === title);
