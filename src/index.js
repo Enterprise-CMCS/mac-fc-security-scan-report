@@ -169,7 +169,7 @@ try {
       if (inputData) {
         try {
           const data = JSON.parse(inputData);
-          for (const project of data) {
+          for (const project of Object.values(data)) {
             vulnerabilities = vulnerabilities.concat(project.vulnerabilities);
           }
         } catch (error) {
