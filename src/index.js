@@ -169,7 +169,7 @@ try {
       if (inputData) {
         try {
           const data = JSON.parse(inputData);
-          for (const project of data) {
+          for (const project of Object.values(data)) {
             vulnerabilities = vulnerabilities.concat(project.vulnerabilities);
           }
         } catch (error) {
@@ -253,10 +253,11 @@ try {
       const vulnerabilities = parseSnykOutput(jsonData);
       console.log(`Parsed vulnerabilities: ${vulnerabilities.length}`);
 
-      const uniqueVulnerabilities = Array.from(new Set(vulnerabilities.map(v => v.title)))
-        .map(title => {
-          return vulnerabilities.find(v => v.title === title);
-        });
+      console.log(vulnerabilities);
+
+      const uniqueVulnerabilities = vulnerabilities
+        .filter(v => v && v.title) // Filter out undefined or objects without a title
+        .map(v => v.title);
 
       for (const vulnerability of uniqueVulnerabilities) {
         try {
