@@ -170,7 +170,9 @@ try {
         try {
           const data = JSON.parse(inputData);
           for (const project of data) {
-            vulnerabilities = vulnerabilities.concat(project.vulnerabilities);
+            if (Array.isArray(project.vulnerabilities) && project.vulnerabilities.length > 0) {
+              vulnerabilities = vulnerabilities.concat(project.vulnerabilities);
+            }
           }
         } catch (error) {
           console.error('Error parsing Snyk output:', error);
@@ -259,10 +261,6 @@ try {
         });
 
       for (const vulnerability of uniqueVulnerabilities) {
-        if (!vulnerability.title) {
-          console.error('Undefined vulnerability detected');
-          continue; // Skip processing undefined vulnerabilities
-        }
         try {
           console.log(`Creating Jira ticket for vulnerability: ${vulnerability.title}`);
           const resp = await createJiraTicket(vulnerability);
