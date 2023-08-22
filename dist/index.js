@@ -62259,9 +62259,8 @@ try {
       if (inputData) {
         try {
           const data = JSON.parse(inputData);
-
-          if (Array.isArray(data.vulnerabilities)) {
-            vulnerabilities = data.vulnerabilities;
+          for (const project of data) {
+            vulnerabilities = vulnerabilities.concat(project.vulnerabilities);
           }
         } catch (error) {
           console.error('Error parsing Snyk output:', error);
@@ -62344,19 +62343,23 @@ try {
       const vulnerabilities = parseSnykOutput(jsonData);
       console.log(`Parsed vulnerabilities: ${vulnerabilities.length}`);
 
-      const uniqueVulnerabilities = Array.from(new Set(vulnerabilities.map(v => v.title)))
-        .map(title => {
-          return vulnerabilities.find(v => v.title === title);
-        });
-
-      for (const vulnerability of uniqueVulnerabilities) {
-        try {
-
-          console.log(`Creating Jira ticket for vulnerability: ${vulnerability.title}`);
-          const resp = await createJiraTicket(vulnerability);
-          console.log(resp)
-        } catch (error) {
-          console.error(`Error while creating Jira ticket for vulnerability ${vulnerability.title}:`, error);
+      if (vulnerabilities == []){
+        console.log('No Vulnerabilities Found!')
+      } else {
+        const uniqueVulnerabilities = Array.from(new Set(vulnerabilities.map(v => v.title)))
+          .map(title => {
+            return vulnerabilities.find(v => v.title === title);
+          });
+        
+        for (const vulnerability of uniqueVulnerabilities) {
+          try {
+  
+            console.log(`Creating Jira ticket for vulnerability: ${vulnerability.title}`);
+            const resp = await createJiraTicket(vulnerability);
+            console.log(resp)
+          } catch (error) {
+            console.error(`Error while creating Jira ticket for vulnerability ${vulnerability.title}:`, error);
+          }
         }
       }
 
