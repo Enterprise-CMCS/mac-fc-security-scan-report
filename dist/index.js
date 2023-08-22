@@ -62259,8 +62259,10 @@ try {
       if (inputData) {
         try {
           const data = JSON.parse(inputData);
+          console.log('Parsed data:', data)
           for (const project of data) {
             if (Array.isArray(project.vulnerabilities) && project.vulnerabilities.length > 0) {
+              console.log('Project vulnerabilities:', project.vulnerabilities);
               vulnerabilities = vulnerabilities.concat(project.vulnerabilities);
             }
           }
