@@ -253,11 +253,14 @@ try {
       const vulnerabilities = parseSnykOutput(jsonData);
       console.log(`Parsed vulnerabilities: ${vulnerabilities.length}`);
 
-      const uniqueVulnerabilities = Array.from(new Set(vulnerabilities.map(v => v.title)))
-        .map(title => {
-          return vulnerabilities.find(v => v.title === title);
-        });
-      if ( vulnerabilities != []){
+      if (vulnerabilities == []){
+        console.log('No Vulnerabilities Found!')
+      } else {
+        const uniqueVulnerabilities = Array.from(new Set(vulnerabilities.map(v => v.title)))
+          .map(title => {
+            return vulnerabilities.find(v => v.title === title);
+          });
+        
         for (const vulnerability of uniqueVulnerabilities) {
           try {
   
@@ -268,8 +271,6 @@ try {
             console.error(`Error while creating Jira ticket for vulnerability ${vulnerability.title}:`, error);
           }
         }
-      }else {
-        console.log('No Vulnerabilities Detected!')
       }
 
     })();
