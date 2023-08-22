@@ -62259,7 +62259,7 @@ try {
       if (inputData) {
         try {
           const data = JSON.parse(inputData);
-          
+
           if (Array.isArray(data.vulnerabilities) && data.vulnerabilities.length > 0) {
             vulnerabilities = vulnerabilities.concat(data.vulnerabilities);
           }
@@ -62341,6 +62341,8 @@ try {
       const scanOutputFilePath = core.getInput('scan-output-path');
       const jsonData = fs.readFileSync(scanOutputFilePath, 'utf-8');
 
+      console.log('JSON data read from file:', jsonData);
+
       const vulnerabilities = parseSnykOutput(jsonData);
       console.log(`Parsed vulnerabilities: ${vulnerabilities.length}`);
 
@@ -62351,6 +62353,7 @@ try {
 
       for (const vulnerability of uniqueVulnerabilities) {
         try {
+          console.log('Processing vulnerability:', vulnerability);
           console.log(`Creating Jira ticket for vulnerability: ${vulnerability.title}`);
           const resp = await createJiraTicket(vulnerability);
           console.log(resp)
