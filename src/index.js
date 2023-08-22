@@ -169,12 +169,9 @@ try {
       if (inputData) {
         try {
           const data = JSON.parse(inputData);
-          console.log('Parsed data:', data)
-          for (const project of data) {
-            if (Array.isArray(project.vulnerabilities) && project.vulnerabilities.length > 0) {
-              console.log('Project vulnerabilities:', project.vulnerabilities);
-              vulnerabilities = vulnerabilities.concat(project.vulnerabilities);
-            }
+          
+          if (Array.isArray(data.vulnerabilities) && data.vulnerabilities.length > 0) {
+            vulnerabilities = vulnerabilities.concat(data.vulnerabilities);
           }
         } catch (error) {
           console.error('Error parsing Snyk output:', error);
