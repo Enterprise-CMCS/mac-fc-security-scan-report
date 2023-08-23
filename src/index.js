@@ -176,7 +176,7 @@ try {
               }
             }
           } else {
-            console.error('NoVulnerabilities Detetcted or Invalid JSON data format.');
+            console.error('No Vulnerabilities Detetcted or Invalid JSON data format.');
             vulnerabilities = parseNonJsonData(inputData);
           }
         } catch (error) {
