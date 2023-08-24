@@ -62126,9 +62126,11 @@ async function doesUserExist(accountId) {
 
     if (response.status === 200) {
       // User exists (status code 200 OK)
+      console.log(response.status);
       return true;
     } else if (response.status === 404) {
       // User does not exist (status code 404 Not Found)
+      console.log(response.status);
       return false;
     } else {
       // Handle other response statuses if needed
