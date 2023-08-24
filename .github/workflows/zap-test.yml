@@ -12,7 +12,7 @@ jobs:
     if: github.event_name == 'pull_request' || 'push'
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: OWASP ZAP Baseline Scan
         continue-on-error: true
@@ -26,10 +26,11 @@ jobs:
           jira-username: ${{ secrets.WORKSPACE_EMAIL }}
           jira-token: ${{ secrets.API_TOKEN }}
           jira-host: arayateklu.atlassian.net
-          jira-project-key: ZAP
+          jira-project-key: MAC
           jira-issue-type: Task
           jira-labels: test,zap
           jira-title-prefix: '[MACFC] - Zap : '
+          assign-jira-ticket-to: ${{ secrets.ACCOUNT_ID_AT }}
           zap-risk-code: '3'
           scan-output-path: 'report_json.json'
-          scan-type: 'zap'    
+          scan-type: 'zap'
