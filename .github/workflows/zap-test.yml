@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - main
-      - fix-not-iterable-issue
   pull_request:
     branches: [ main ]
 
@@ -31,7 +30,7 @@ jobs:
           jira-issue-type: Task
           jira-labels: test,zap
           jira-title-prefix: '[MACFC] - Zap : '
-          assign-jira-ticket-to: '712020:d17f0d00-fb3b-4b4b-b778-0249dd16559d'
+          assign-jira-ticket-to: ${{ secrets.ACCOUNT_ID_AT }}
           zap-risk-code: '3'
           scan-output-path: 'report_json.json'
           scan-type: 'zap'

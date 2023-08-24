@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - main
-      - fix-not-iterable-issue
   pull_request:
     branches: [ main ]
 jobs:
@@ -26,14 +25,13 @@ jobs:
       - name: use the custom github  action to parse Snyk output
         uses: ./
         with:
-          jira-username: ${{ secrets.WORKSPACE_EMAIL_NET }}
-          jira-token: ${{ secrets.API_TOKEN_NET }}
-          jira-host: qmacbis.atlassian.net
-          jira-project-key: "MDCT"
-          jira-custom-field-key-value: '{ "customfield_10007" : "MDCT-2280", "customfield_14154" : [{"id": "16958", "value": "MCR"}]  }'
+          jira-username: ${{ secrets.WORKSPACE_EMAIL }}
+          jira-token: ${{ secrets.API_TOKEN }}
+          jira-host: arayateklu.atlassian.net
+          jira-project-key: MAC
           jira-issue-type: Task
           jira-labels: test,Snyk
           jira-title-prefix: '[MACFC] - Snyk : '
-          # assign-jira-ticket-to: '712020:d17f0d00-fb3b-4b4b-b778-0249dd16559d'
+          assign-jira-ticket-to: ${{ secrets.ACCOUNT_ID_AT }}
           scan-output-path: 'snyk_output.txt'
           scan-type: 'snyk' 
