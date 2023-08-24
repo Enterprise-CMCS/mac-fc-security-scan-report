@@ -169,32 +169,38 @@ try {
       if (inputData) {
         try {
           const data = JSON.parse(inputData);
-          for (const project of Object.values(data)) {
-            vulnerabilities = vulnerabilities.concat(project.vulnerabilities);
+          if (Array.isArray(data)) {
+            for (const project of data) {
+              if (project && project.vulnerabilities && Array.isArray(project.vulnerabilities)) {
+                vulnerabilities = vulnerabilities.concat(project.vulnerabilities);
+              }
+            }
+          } else {
+            console.error('No Vulnerabilities Detetcted or Invalid JSON data format.');
+            // vulnerabilities = parseNonJsonData(inputData);
           }
         } catch (error) {
           console.error('Error parsing Snyk output:', error);
-          vulnerabilities = parseNonJsonData(inputData);
+          // vulnerabilities = parseNonJsonData(inputData);
         }
       }
-
       return vulnerabilities;
     }
 
 
-    function parseNonJsonData(inputData) {
-      let vulnerabilities = [];
+    // function parseNonJsonData(inputData) {
+    //   let vulnerabilities = [];
 
-      // Custom logic to parse non-JSON inputData
-      const defaultTitle = 'Vulnerability Detected';
+    //   // Custom logic to parse non-JSON inputData
+    //   const defaultTitle = 'Vulnerability Detected';
 
-      vulnerabilities.push({
-        title: defaultTitle,
-        description: `Non-JSON output from Snyk:\n\n${inputData}`
-      });
+    //   vulnerabilities.push({
+    //     title: defaultTitle,
+    //     description: `Non-JSON output from Snyk:\n\n${inputData}`
+    //   });
 
-      return vulnerabilities;
-    }
+    //   return vulnerabilities;
+    // }
 
 
     async function createJiraTicket(vulnerability) {
@@ -253,11 +259,10 @@ try {
       const vulnerabilities = parseSnykOutput(jsonData);
       console.log(`Parsed vulnerabilities: ${vulnerabilities.length}`);
 
-      console.log(vulnerabilities);
-
-      const uniqueVulnerabilities = vulnerabilities
-        .filter(v => v && v.title) // Filter out undefined or objects without a title
-        .map(v => v.title);
+      const uniqueVulnerabilities = Array.from(new Set(vulnerabilities.map(v => v.title)))
+        .map(title => {
+          return vulnerabilities.find(v => v.title === title);
+        });
 
       for (const vulnerability of uniqueVulnerabilities) {
         try {

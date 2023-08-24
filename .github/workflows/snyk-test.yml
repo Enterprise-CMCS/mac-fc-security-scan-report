@@ -18,6 +18,7 @@ jobs:
         run: |
           npm install -g snyk
           snyk test --all-projects --json > snyk_output.txt || true
+          cat snyk_output.txt
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
   
@@ -31,6 +32,6 @@ jobs:
           jira-issue-type: Task
           jira-labels: test,Snyk
           jira-title-prefix: '[MACFC] - Snyk : '
-          assign-jira-ticket-to: '712020:d17f0d00-fb3b-4b4b-b778-0249dd16559d'
+          assign-jira-ticket-to: ${{ secrets.ACCOUNT_ID_AT }}
           scan-output-path: 'snyk_output.txt'
-          scan-type: 'snyk'
+          scan-type: 'snyk' 
