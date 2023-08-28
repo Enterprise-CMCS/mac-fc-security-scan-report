@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - jira-enterp-support
   pull_request:
     branches: [ main ]
 
@@ -12,7 +13,7 @@ jobs:
     if: github.event_name == 'pull_request' || 'push'
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
       - name: OWASP ZAP Baseline Scan
         continue-on-error: true
@@ -23,14 +24,14 @@ jobs:
       - name: Run Jira Ticket Creator
         uses: ./
         with:
-          jira-username: ${{ secrets.WORKSPACE_EMAIL }}
-          jira-token: ${{ secrets.API_TOKEN }}
-          jira-host: arayateklu.atlassian.net
-          jira-project-key: MAC
-          jira-issue-type: Task
+          jira-username: TTHO
+          jira-token: ${{ secrets.JIRA_NET_BEARER_TOKEN }}
+          jira-host: jiraent.cms.gov
+          jira-project-key: EREGCSC
+          jira-issue-type: Bug
           jira-labels: test,zap
-          jira-title-prefix: '[MACFC] - Zap : '
-          assign-jira-ticket-to: ${{ secrets.ACCOUNT_ID_AT }}
+          jira-title-prefix: '[EREGCSC] - Zap : '
+          assign-jira-ticket-to: TTHO
           zap-risk-code: '3'
           scan-output-path: 'report_json.json'
           scan-type: 'zap'
