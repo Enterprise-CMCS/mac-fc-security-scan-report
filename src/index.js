@@ -106,17 +106,17 @@ try {
         const issue = {
           "fields": {
             "project": {
-              "key": core.getInput('jira-project-key'),
+              "key": core.getInput('jira-project-key')
             },
             "summary": core.getInput('jira-title-prefix').concat(' ', vulnerability.name),
             "description": vulnerability.desc.concat('\n', vulnerability.instanceDesc),
             "issuetype": {
-              "name": core.getInput('jira-issue-type'),
+              "name": core.getInput('jira-issue-type')
             },
             "assignee": {
-              "name": assignee ? username : null,
+              "name": assignee ? username : null
             },
-            "labels": core.getInput('jira-labels').split(','),
+            "labels": [ core.getInput('jira-labels').split(',') ],
             ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
           },
         };
@@ -244,19 +244,19 @@ try {
         const assignee = await doesUserExist(username).catch(() => null)
 
         const issue = {
-          fields: {
-            project: {
-              key: core.getInput('jira-project-key'),
+          "fields": {
+            "project": {
+              key: core.getInput('jira-project-key')
             },
-            summary: `${core.getInput('jira-title-prefix')}  ${vulnerability.title}`,
-            description: vulnerability.description,
-            issuetype: {
-              name: core.getInput('jira-issue-type'),
+            "summary": `${core.getInput('jira-title-prefix')}  ${vulnerability.title}`,
+            "description": vulnerability.description,
+            "issuetype": {
+              "name": core.getInput('jira-issue-type')
             },
-            assignee: {
-              name: assignee ? username : null,
+            "assignee": {
+              "name": assignee ? username : null
             },
-            labels: core.getInput('jira-labels').split(','),
+            "labels": [ core.getInput('jira-labels').split(',') ],
             ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
           },
         };

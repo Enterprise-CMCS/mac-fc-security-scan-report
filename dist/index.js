@@ -6132,7 +6132,7 @@ module.exports = require("zlib");
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
-// Axios v1.4.0 Copyright (c) 2023 Matt Zabriskie and contributors
+// Axios v1.5.0 Copyright (c) 2023 Matt Zabriskie and contributors
 
 
 const FormData$1 = __nccwpck_require__(8448);
@@ -6702,8 +6702,9 @@ const reduceDescriptors = (obj, reducer) => {
   const reducedDescriptors = {};
 
   forEach(descriptors, (descriptor, name) => {
-    if (reducer(descriptor, name, obj) !== false) {
-      reducedDescriptors[name] = descriptor;
+    let ret;
+    if ((ret = reducer(descriptor, name, obj)) !== false) {
+      reducedDescriptors[name] = ret || descriptor;
     }
   });
 
@@ -7487,10 +7488,6 @@ function formDataToJSON(formData) {
   return null;
 }
 
-const DEFAULT_CONTENT_TYPE = {
-  'Content-Type': undefined
-};
-
 /**
  * It takes a string, tries to parse it, and if it fails, it returns the stringified version
  * of the input
@@ -7520,7 +7517,7 @@ const defaults = {
 
   transitional: transitionalDefaults,
 
-  adapter: ['xhr', 'http'],
+  adapter: 'http' ,
 
   transformRequest: [function transformRequest(data, headers) {
     const contentType = headers.getContentType() || '';
@@ -7629,17 +7626,14 @@ const defaults = {
 
   headers: {
     common: {
-      'Accept': 'application/json, text/plain, */*'
+      'Accept': 'application/json, text/plain, */*',
+      'Content-Type': undefined
     }
   }
 };
 
-utils.forEach(['delete', 'get', 'head'], function forEachMethodNoData(method) {
+utils.forEach(['delete', 'get', 'head', 'post', 'put', 'patch'], (method) => {
   defaults.headers[method] = {};
-});
-
-utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
-  defaults.headers[method] = utils.merge(DEFAULT_CONTENT_TYPE);
 });
 
 const defaults$1 = defaults;
@@ -7975,7 +7969,17 @@ class AxiosHeaders {
 
 AxiosHeaders.accessor(['Content-Type', 'Content-Length', 'Accept', 'Accept-Encoding', 'User-Agent', 'Authorization']);
 
-utils.freezeMethods(AxiosHeaders.prototype);
+// reserved names hotfix
+utils.reduceDescriptors(AxiosHeaders.prototype, ({value}, key) => {
+  let mapped = key[0].toUpperCase() + key.slice(1); // map `set` => `Set`
+  return {
+    get: () => value,
+    set(headerValue) {
+      this[mapped] = headerValue;
+    }
+  }
+});
+
 utils.freezeMethods(AxiosHeaders);
 
 const AxiosHeaders$1 = AxiosHeaders;
@@ -8095,7 +8099,7 @@ function buildFullPath(baseURL, requestedURL) {
   return requestedURL;
 }
 
-const VERSION = "1.4.0";
+const VERSION = "1.5.0";
 
 function parseProtocol(url) {
   const match = /^([-+\w]{1,25})(:?\/\/|:)/.exec(url);
@@ -8944,10 +8948,12 @@ const httpAdapter = isHttpAdapterSupported && function httpAdapter(config) {
       auth,
       protocol,
       family,
-      lookup,
       beforeRedirect: dispatchBeforeRedirect,
       beforeRedirects: {}
     };
+
+    // cacheable-lookup integration hotfix
+    !utils.isUndefined(lookup) && (options.lookup = lookup);
 
     if (config.socketPath) {
       options.socketPath = config.socketPath;
@@ -9945,15 +9951,13 @@ class Axios {
     // Set config.method
     config.method = (config.method || this.defaults.method || 'get').toLowerCase();
 
-    let contextHeaders;
-
     // Flatten headers
-    contextHeaders = headers && utils.merge(
+    let contextHeaders = headers && utils.merge(
       headers.common,
       headers[config.method]
     );
 
-    contextHeaders && utils.forEach(
+    headers && utils.forEach(
       ['delete', 'get', 'head', 'post', 'put', 'patch', 'common'],
       (method) => {
         delete headers[method];
@@ -10363,6 +10367,8 @@ axios.AxiosHeaders = AxiosHeaders$1;
 
 axios.formToJSON = thing => formDataToJSON(utils.isHTMLForm(thing) ? new FormData(thing) : thing);
 
+axios.getAdapter = adapters.getAdapter;
+
 axios.HttpStatusCode = HttpStatusCode$1;
 
 axios.default = axios;
@@ -10528,19 +10534,19 @@ try {
         const assignee = await doesUserExist(username).catch(() => null)
 
         const issue = {
-          fields: {
-            project: {
-              key: core.getInput('jira-project-key'),
+          "fields": {
+            "project": {
+              "key": core.getInput('jira-project-key')
             },
-            summary: core.getInput('jira-title-prefix').concat(' ', vulnerability.name),
-            description: vulnerability.desc.concat('\n', vulnerability.instanceDesc),
-            issuetype: {
-              name: core.getInput('jira-issue-type'),
+            "summary": core.getInput('jira-title-prefix').concat(' ', vulnerability.name),
+            "description": vulnerability.desc.concat('\n', vulnerability.instanceDesc),
+            "issuetype": {
+              "name": core.getInput('jira-issue-type')
             },
-            assignee: {
-              name: assignee ? username : null,
+            "assignee": {
+              "name": assignee ? username : null
             },
-            labels: core.getInput('jira-labels').split(','),
+            "labels": [ core.getInput('jira-labels').split(',') ],
             ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
           },
         };
@@ -10668,19 +10674,19 @@ try {
         const assignee = await doesUserExist(username).catch(() => null)
 
         const issue = {
-          fields: {
-            project: {
-              key: core.getInput('jira-project-key'),
+          "fields": {
+            "project": {
+              key: core.getInput('jira-project-key')
             },
-            summary: `${core.getInput('jira-title-prefix')}  ${vulnerability.title}`,
-            description: vulnerability.description,
-            issuetype: {
-              name: core.getInput('jira-issue-type'),
+            "summary": `${core.getInput('jira-title-prefix')}  ${vulnerability.title}`,
+            "description": vulnerability.description,
+            "issuetype": {
+              "name": core.getInput('jira-issue-type')
             },
-            assignee: {
-              name: assignee ? username : null,
+            "assignee": {
+              "name": assignee ? username : null
             },
-            labels: core.getInput('jira-labels').split(','),
+            "labels": [ core.getInput('jira-labels').split(',') ],
             ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
           },
         };
