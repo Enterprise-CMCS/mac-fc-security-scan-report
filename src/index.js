@@ -3,20 +3,33 @@ const axios = require('axios').default;
 const core = require('@actions/core');
 const path = require('path');
 
-// Install @actions/core
-core.startGroup('Installing @actions/core');
-const installActionsCore = require('child_process').spawnSync('npm', ['install', '@actions/core'], { stdio: 'inherit' });
-core.endGroup();
+// Install dependencies 
+const installDependency = (dependency) => {
+  core.startGroup(`Installing ${dependency}`);
+  const installResult = require('child_process').spawnSync('npm', ['install', dependency], { stdio: 'inherit' });
+  core.endGroup();
+  return installResult;
+};
 
-// Install axios
-core.startGroup('Installing axios');
-const installAxios = require('child_process').spawnSync('npm', ['install', 'axios'], { stdio: 'inherit' });
-core.endGroup();
+const installDependencies = (dependencies) => {
+  dependencies.forEach(dependency => installDependency(dependency));
+};
 
-// Install path
-core.startGroup('Installing path module');
-const pathInstall = require('child_process').spawnSync('npm', ['install', 'path'], { stdio: 'inherit' });
-core.endGroup();
+
+// // Install @actions/core
+// core.startGroup('Installing @actions/core');
+// const installActionsCore = require('child_process').spawnSync('npm', ['install', '@actions/core'], { stdio: 'inherit' });
+// core.endGroup();
+
+// // Install axios
+// core.startGroup('Installing axios');
+// const installAxios = require('child_process').spawnSync('npm', ['install', 'axios'], { stdio: 'inherit' });
+// core.endGroup();
+
+// // Install path
+// core.startGroup('Installing path module');
+// const pathInstall = require('child_process').spawnSync('npm', ['install', 'path'], { stdio: 'inherit' });
+// core.endGroup();
 
 const token = core.getInput('jira-token');
 const jira = axios.create({
@@ -41,7 +54,6 @@ async function doesUserExist(username) {
     const response = await jira.get(`https://${core.getInput('jira-host')}/rest/api/2/user?username=${username}`, jiraheaders);
 
     if (response.status === 200) {
-      console.log('^^^^User found^^^^^^:', response.data);
       // User exists (status code 200 OK)
       return true;
     } else if (response.status === 404) {
@@ -106,8 +118,7 @@ try {
         const searchResponse = await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
         
         const searchResult = searchResponse.data;
-  
-        console.log(`***SEARCH RESPONSE ***` , searchResponse.status);
+        
         console.log('Matching issues found:', searchResult.issues);
     
         if (searchResponse.status === 200) {
@@ -146,7 +157,7 @@ try {
             if (issueResponse.status === 201) {
               
               console.log(`Jira ticket created for vulnerability: ${vulnerability.name}`);
-              return issueResponse;
+              return issueResponse.data;
             } else {
               console.error(`Error creating Jira ticket. Unexpected response status: ${issueResponse.status} ${issueResponse.statusText}`);
               return null;
@@ -274,7 +285,7 @@ try {
             if (issueResponse.status === 201) {
               
               console.log(`Jira ticket created for vulnerability: ${vulnerability.name}`);
-              return issueResponse;
+              return issueResponse.data;
             } else {
               console.error(`Error creating Jira ticket. Unexpected response status: ${issueResponse.status} ${issueResponse.statusText}`);
               return null;
