@@ -132,7 +132,7 @@ try {
                 "assignee": {
                    "name": `${assignee ? username : null}`
                 },
-                "labels": `${core.getInput('jira-labels').split(',')}`,
+                "labels": [ core.getInput('jira-labels').split(',')],
                 ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
               }
             };
