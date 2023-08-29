@@ -10445,22 +10445,6 @@ const installDependencies = (dependencies) => {
   dependencies.forEach(dependency => installDependency(dependency));
 };
 
-
-// // Install @actions/core
-// core.startGroup('Installing @actions/core');
-// const installActionsCore = require('child_process').spawnSync('npm', ['install', '@actions/core'], { stdio: 'inherit' });
-// core.endGroup();
-
-// // Install axios
-// core.startGroup('Installing axios');
-// const installAxios = require('child_process').spawnSync('npm', ['install', 'axios'], { stdio: 'inherit' });
-// core.endGroup();
-
-// // Install path
-// core.startGroup('Installing path module');
-// const pathInstall = require('child_process').spawnSync('npm', ['install', 'path'], { stdio: 'inherit' });
-// core.endGroup();
-
 const token = core.getInput('jira-token');
 const jira = axios.create({
     baseURL: `https://${core.getInput('jira-host')}`,
@@ -10548,7 +10532,7 @@ try {
         const searchResponse = await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
         
         const searchResult = searchResponse.data;
-        
+
         console.log('Matching issues found:', searchResult.issues);
     
         if (searchResponse.status === 200) {
@@ -10580,9 +10564,6 @@ try {
     
             const createIssueUrl = `https://${core.getInput('jira-host')}/rest/api/2/issue`;
             const issueResponse = await jira.post(createIssueUrl, issue, jiraheaders);
-  
-            console.log(`***issueResponse ***` , issueResponse.status);
-            console.log(`***issueResponseDATA ***` , issueResponse.data);
     
             if (issueResponse.status === 201) {
               
@@ -10651,34 +10632,13 @@ try {
       return vulnerabilities;
     }
 
-
-    // function parseNonJsonData(inputData) {
-    //   let vulnerabilities = [];
-
-    //   // Custom logic to parse non-JSON inputData
-    //   const defaultTitle = 'Vulnerability Detected';
-
-    //   vulnerabilities.push({
-    //     title: defaultTitle,
-    //     description: `Non-JSON output from Snyk:\n\n${inputData}`
-    //   });
-
-    //   return vulnerabilities;
-    // }
-
-
     async function createJiraTicket(vulnerability) {
       try {
         
         const title = vulnerability.title.replaceAll("\"", "\\\"");
         const jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${vulnerability.title}" AND created >= startOfDay("-360d") AND status != "Canceled"`;
         const searchResponse = await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
-        
-        const searchResult = searchResponse.data;
-  
-        console.log(`***SEARCH RESPONSE ***` , searchResponse.status);
-        console.log('Matching issues found:', searchResult.issues);
-    
+            
         if (searchResponse.status === 200) {
           const searchResult = searchResponse.data;
           if (!searchResult.issues || searchResult.issues.length === 0) {
@@ -10691,26 +10651,23 @@ try {
             const issue = {
               "fields": {
                 "project": {
-                  "key": core.getInput('jira-project-key')
+                  "key": `${core.getInput('jira-project-key')}`
                 },
                 "summary": `${core.getInput('jira-title-prefix')}  ${vulnerability.title}`,
-                "description": vulnerability.description,
+                "description": `${vulnerability.description}`,
                 "issuetype": {
-                  "name": core.getInput('jira-issue-type')
+                  "name": `${core.getInput('jira-issue-type')}`
                 },
                 "assignee": {
-                   "name": assignee ? username : null
+                   "name": `${assignee ? username : null}`
                 },
-                "labels": [ core.getInput('jira-labels').split(',') ],
+                "labels": core.getInput('jira-labels').split(','),
                 ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
               }
             };
     
             const createIssueUrl = `https://${core.getInput('jira-host')}/rest/api/2/issue`;
             const issueResponse = await jira.post(createIssueUrl, issue, jiraheaders);
-  
-            console.log(`***issueResponse ***` , issueResponse.status);
-            console.log(`***issueResponseDATA ***` , issueResponse.data);
     
             if (issueResponse.status === 201) {
               
