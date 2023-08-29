@@ -10531,7 +10531,7 @@ try {
       return vulnerabilities;
     }
 
-    async function createJiraTicket() {
+    async function createJiraTicket(vulnerability) {
       try {
         const jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${vulnerability.name}" AND created >= startOfDay("-360d") AND status != "Canceled"`;
         const searchResponse = await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
@@ -10657,7 +10657,7 @@ try {
     // }
 
 
-    async function createJiraTicket() {
+    async function createJiraTicket(vulnerability) {
       try {
         
         const title = vulnerability.title.replaceAll("\"", "\\\"");
