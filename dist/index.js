@@ -10484,15 +10484,6 @@ async function doesUserExist(username) {
 }
 
 try {
-  // const token = core.getInput('jira-token');
-  // const jira = axios.create({
-  //     baseURL: `https://${core.getInput('jira-host')}`,
-  //     headers: {
-  //       Authorization: `Bearer ${token}`,
-  //       'Content-Type': 'application/json',
-  //     },
-  // });
-
   const scanType = core.getInput('scan-type');
   if (scanType === 'zap') {
     // Parse the JSON file from Zap scan
@@ -10532,11 +10523,7 @@ try {
         const searchResponse = await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
         
         const searchResult = searchResponse.data;
-
-        console.log('Matching issues found:', searchResult.issues);
-    
         if (searchResponse.status === 200) {
-          const searchResult = searchResponse.data;
           if (!searchResult.issues || searchResult.issues.length === 0) {
             
             const username = core.getInput('assign-jira-ticket-to');
@@ -10638,9 +10625,8 @@ try {
         const title = vulnerability.title.replaceAll("\"", "\\\"");
         const jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${vulnerability.title}" AND created >= startOfDay("-360d") AND status != "Canceled"`;
         const searchResponse = await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
-            
+        const searchResult = searchResponse.data;   
         if (searchResponse.status === 200) {
-          const searchResult = searchResponse.data;
           if (!searchResult.issues || searchResult.issues.length === 0) {
             
             const username = core.getInput('assign-jira-ticket-to');
