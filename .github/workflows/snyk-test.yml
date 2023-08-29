@@ -32,7 +32,7 @@ jobs:
           jira-project-key: EREGCSC
           jira-issue-type: Bug
           jira-labels: test,Snyk
-          ira-title-prefix: '[EREGCSC] - Zap : '
+          jira-title-prefix: '[EREGCSC] - Zap : '
           assign-jira-ticket-to: TTHO
           scan-output-path: 'snyk_output.txt'
           scan-type: 'snyk' 
