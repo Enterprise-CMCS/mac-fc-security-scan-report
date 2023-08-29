@@ -1,5 +1,5 @@
 const fs = require('fs');
-const axios = require('axios'); 
+const axios = require('axios').default; 
 const core = require('@actions/core');
 const path = require('path');
 
@@ -18,18 +18,31 @@ core.startGroup('Installing path module');
 const pathInstall = require('child_process').spawnSync('npm', ['install', 'path'], { stdio: 'inherit' });
 core.endGroup();
 
+const token = core.getInput('jira-token');
+const jira = axios.create({
+    baseURL: `https://${core.getInput('jira-host')}`,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+const jiraheaders = {  
+  headers: {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json',
+    'X-Atlassian-Token': 'no-check',
+  },
+};
+
 // Function to check if the user exists using the Jira REST API
 async function doesUserExist(username) {
   try {
     const token = core.getInput('jira-token'); 
-    const response = await axios.get(`https://${core.getInput('jira-host')}/rest/api/2/user?username=${username}`, {
-      headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json'
-      }
-    });
+    const response = await jira.get(`https://${core.getInput('jira-host')}/rest/api/2/user?username=${username}`, jiraheaders);
 
     if (response.status === 200) {
+      console.log('^^^^User found^^^^^^:', response.data);
       // User exists (status code 200 OK)
       return true;
     } else if (response.status === 404) {
@@ -46,14 +59,14 @@ async function doesUserExist(username) {
 }
 
 try {
-  const token = core.getInput('jira-token');
-  const jira = axios.create({
-      baseURL: `https://${core.getInput('jira-host')}`,
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-  });
+  // const token = core.getInput('jira-token');
+  // const jira = axios.create({
+  //     baseURL: `https://${core.getInput('jira-host')}`,
+  //     headers: {
+  //       Authorization: `Bearer ${token}`,
+  //       'Content-Type': 'application/json',
+  //     },
+  // });
 
   const scanType = core.getInput('scan-type');
   if (scanType === 'zap') {
@@ -88,79 +101,67 @@ try {
       return vulnerabilities;
     }
 
-    async function createJiraTicket(vulnerability) {
-      const jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${vulnerability.name}" AND created >= startOfDay("-60d") AND != "Canceled")`;
-      const searchResult = await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
-
-      const axiosearchResult = searchResult.data;
-      console.log(`***SEARCH RESPONSE ***` , axiosearchResult.status);
-      console.log('Matching issues found:', axiosearchResult.issues);
-
-      if (!searchResult.issues || searchResult.issues.length === 0) {
-        const customFieldKeyValue = core.getInput('jira-custom-field-key-value') ? JSON.parse(core.getInput('jira-custom-field-key-value')) : null;
-        const customJiraFields = customFieldKeyValue ? { ...customFieldKeyValue } : null;
-
-        const username = core.getInput('assign-jira-ticket-to');
-        const assignee = await doesUserExist(username).catch(() => null)
-
-        const issue = {
-          "fields": {
-            "project": {
-              "key": core.getInput('jira-project-key')
-            },
-            "summary": core.getInput('jira-title-prefix').concat(' ', vulnerability.name),
-            "description": vulnerability.desc.concat('\n', vulnerability.instanceDesc),
-            "issuetype": {
-              "name": core.getInput('jira-issue-type')
-            },
-            "assignee": {
-              "name": assignee ? username : null
-            },
-            "labels": [ core.getInput('jira-labels').split(',') ],
-            ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
-          },
-        };
-
-        const createIssueUrl = `https://${core.getInput('jira-host')}/rest/api/2/issue`;
-        const issueResponse = await jira.post(createIssueUrl, issue, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-            'X-Atlassian-Token': 'no-check',
-          },
-        });
-
-        if (issueResponse.status === 201) {
-          const issueResponse = issueResponse.data;
-          console.log(`Jira ticket created for vulnerability: ${vulnerability.name}`);
-
-          process.env.SCAN_OUTPUT_FILE_PATH = core.getInput('scan-output-path');
-          const scanOutputFilePath = process.env.SCAN_OUTPUT_FILE_PATH;
-
-          try {
-            const attachmentUrl = `https://${core.getInput('jira-host')}/rest/api/3/issue/${issueResponse.key}/attachments`;
-            const attachmentHeaders = {
-                headers: {
-                  'Authorization': `Bearer ${token}`,
-                  'Content-Type': 'application/octet-stream',
-                  'X-Atlassian-Token': 'no-check'
+    async function createJiraTicket() {
+      try {
+        const jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${vulnerability.name}" AND created >= startOfDay("-360d") AND status != "Canceled"`;
+        const searchResponse = await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
+        
+        const searchResult = searchResponse.data;
+  
+        console.log(`***SEARCH RESPONSE ***` , searchResponse.status);
+        console.log('Matching issues found:', searchResult.issues);
+    
+        if (searchResponse.status === 200) {
+          const searchResult = searchResponse.data;
+          if (!searchResult.issues || searchResult.issues.length === 0) {
+            
+            const username = core.getInput('assign-jira-ticket-to');
+            const assignee = await doesUserExist(username).catch(() => null);
+            const customFieldKeyValue = core.getInput('jira-custom-field-key-value') ? JSON.parse(core.getInput('jira-custom-field-key-value')) : null;
+            const customJiraFields = customFieldKeyValue ? { ...customFieldKeyValue } : null;
+  
+            const issue = {
+              "fields": {
+                "project": {
+                  "key": core.getInput('jira-project-key')
                 },
-                params: {
-                  filename: path.basename(scanOutputFilePath),
+                "summary": core.getInput('jira-title-prefix').concat(' ', vulnerability.name),
+                "description": vulnerability.desc.concat('\n', vulnerability.instanceDesc),
+                "issuetype": {
+                  "name": core.getInput('jira-issue-type')
                 },
+                "assignee": {
+                   "name": assignee ? username : null
+                },
+                "labels": [ core.getInput('jira-labels').split(',') ],
+                ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
+              }
             };
-            await axios.post(attachmentUrl, fs.createReadStream(scanOutputFilePath), attachmentHeaders);
-            console.log(`Attachment added to Jira ticket ${issueResponse.key}`);
-          } catch (error) {
-            console.error(`Error adding attachment to Jira ticket ${issueResponse.key}:`, error);
+    
+            const createIssueUrl = `https://${core.getInput('jira-host')}/rest/api/2/issue`;
+            const issueResponse = await jira.post(createIssueUrl, issue, jiraheaders);
+  
+            console.log(`***issueResponse ***` , issueResponse.status);
+            console.log(`***issueResponseDATA ***` , issueResponse.data);
+    
+            if (issueResponse.status === 201) {
+              
+              console.log(`Jira ticket created for vulnerability: ${vulnerability.name}`);
+              return issueResponse;
+            } else {
+              console.error(`Error creating Jira ticket. Unexpected response status: ${issueResponse.status} ${issueResponse.statusText}`);
+              return null;
+            }
+          } else {
+            console.log(`Active Jira ticket already exists for vulnerability: ${vulnerability.name}`);
           }
-          return issueResponse;
         } else {
-            console.error(`Error creating Jira ticket. Unexpected response status: ${issueResponse.status} ${issueResponse.statusText}`);
-            return null;
+          console.error(`Error querying Jira. Unexpected response status: ${searchResponse.status} ${searchResponse.statusText}`);
+          return null;
         }
-      } else {
-        console.log(`Active Jira ticket already exists for vulnerability: ${vulnerability.name}`);
+      } catch (error) {
+        console.error(`Error while creating Jira ticket for vulnerability ${vulnerability.name}:`, error);
+        return null;
       }
     }
 
@@ -226,81 +227,69 @@ try {
     // }
 
 
-    async function createJiraTicket(vulnerability) {
-      // JQL query with relative date math, status conditions.
-      const title = vulnerability.title.replaceAll("\"", "\\\"");
-      const jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${vulnerability.title}" AND created >= startOfDay("-60d") AND != "Canceled")`;
-      const searchResult = await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
-
-      const axiosearchResult = searchResult.data;
-      console.log(`***SEARCH RESPONSE ***` , axiosearchResult.status);
-      console.log('Matching issues found:', axiosearchResult.issues);
-
-      if (!searchResult.issues || searchResult.issues.length === 0) {
-        const customFieldKeyValue = core.getInput('jira-custom-field-key-value') ? JSON.parse(core.getInput('jira-custom-field-key-value')) : null;
-        const customJiraFields = customFieldKeyValue ? { ...customFieldKeyValue } : null;
-
-        const username = core.getInput('assign-jira-ticket-to');
-        const assignee = await doesUserExist(username).catch(() => null)
-
-        const issue = {
-          "fields": {
-            "project": {
-              key: core.getInput('jira-project-key')
-            },
-            "summary": `${core.getInput('jira-title-prefix')}  ${vulnerability.title}`,
-            "description": vulnerability.description,
-            "issuetype": {
-              "name": core.getInput('jira-issue-type')
-            },
-            "assignee": {
-              "name": assignee ? username : null
-            },
-            "labels": [ core.getInput('jira-labels').split(',') ],
-            ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
-          },
-        };
-
-        const createIssueUrl = `https://${core.getInput('jira-host')}/rest/api/2/issue`;
-        const issueResponse = await jira.post(createIssueUrl, issue, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-            'X-Atlassian-Token': 'no-check',
-          },
-        });
-
-        if (issueResponse.status === 201) {
-          const issueResponse = issueResponse.data;
-          console.log(`Jira ticket created for vulnerability: ${vulnerability.title}`);
-
-          process.env.SCAN_OUTPUT_FILE_PATH = core.getInput('scan-output-path');
-          const scanOutputFilePath = process.env.SCAN_OUTPUT_FILE_PATH;
-
-          try {
-            const attachmentUrl = `https://${core.getInput('jira-host')}/rest/api/3/issue/${issueResponse.key}/attachments`;
-            const attachmentHeaders = {
-                headers: {
-                  'Authorization': `Bearer ${token}`,
-                  'Content-Type': 'application/octet-stream',
-                  'X-Atlassian-Token': 'no-check'
+    async function createJiraTicket() {
+      try {
+        
+        const title = vulnerability.title.replaceAll("\"", "\\\"");
+        const jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${vulnerability.title}" AND created >= startOfDay("-360d") AND status != "Canceled"`;
+        const searchResponse = await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
+        
+        const searchResult = searchResponse.data;
+  
+        console.log(`***SEARCH RESPONSE ***` , searchResponse.status);
+        console.log('Matching issues found:', searchResult.issues);
+    
+        if (searchResponse.status === 200) {
+          const searchResult = searchResponse.data;
+          if (!searchResult.issues || searchResult.issues.length === 0) {
+            
+            const username = core.getInput('assign-jira-ticket-to');
+            const assignee = await doesUserExist(username).catch(() => null);
+            const customFieldKeyValue = core.getInput('jira-custom-field-key-value') ? JSON.parse(core.getInput('jira-custom-field-key-value')) : null;
+            const customJiraFields = customFieldKeyValue ? { ...customFieldKeyValue } : null;
+  
+            const issue = {
+              "fields": {
+                "project": {
+                  "key": core.getInput('jira-project-key')
                 },
-                params: {
-                  filename: path.basename(scanOutputFilePath),
+                "summary": `${core.getInput('jira-title-prefix')}  ${vulnerability.title}`,
+                "description": vulnerability.description,
+                "issuetype": {
+                  "name": core.getInput('jira-issue-type')
                 },
+                "assignee": {
+                   "name": assignee ? username : null
+                },
+                "labels": [ core.getInput('jira-labels').split(',') ],
+                ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
+              }
             };
-            await axios.post(attachmentUrl, fs.createReadStream(scanOutputFilePath), attachmentHeaders);
-            console.log(`Attachment added to Jira ticket ${issueResponse.key}`);
-          } catch (error) {
-            console.error(`Error adding attachment to Jira ticket ${issueResponse.key}:`, error);
+    
+            const createIssueUrl = `https://${core.getInput('jira-host')}/rest/api/2/issue`;
+            const issueResponse = await jira.post(createIssueUrl, issue, jiraheaders);
+  
+            console.log(`***issueResponse ***` , issueResponse.status);
+            console.log(`***issueResponseDATA ***` , issueResponse.data);
+    
+            if (issueResponse.status === 201) {
+              
+              console.log(`Jira ticket created for vulnerability: ${vulnerability.name}`);
+              return issueResponse;
+            } else {
+              console.error(`Error creating Jira ticket. Unexpected response status: ${issueResponse.status} ${issueResponse.statusText}`);
+              return null;
+            }
+          } else {
+            console.log(`Active Jira ticket already exists for vulnerability: ${vulnerability.name}`);
           }
-          return issueResponse;
         } else {
-            console.error(`Error creating Jira ticket. Unexpected response status: ${issueResponse.status} ${issueResponse.statusText}`);
-            return null;
+          console.error(`Error querying Jira. Unexpected response status: ${searchResponse.status} ${searchResponse.statusText}`);
+          return null;
         }
-      } else {
-        console.log(`Active Jira ticket already exists for vulnerability: ${vulnerability.title}`);
+      } catch (error) {
+        console.error(`Error while creating Jira ticket for vulnerability ${vulnerability.name}:`, error);
+        return null;
       }
     }
 

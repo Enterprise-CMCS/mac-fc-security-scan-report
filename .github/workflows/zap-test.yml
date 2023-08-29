@@ -24,14 +24,14 @@ jobs:
       - name: Run Jira Ticket Creator
         uses: ./
         with:
-          jira-username: TTHO
+          jira-username: "TTHO"
           jira-token: ${{ secrets.JIRA_NET_BEARER_TOKEN }}
-          jira-host: jiraent.cms.gov
-          jira-project-key: EREGCSC
-          jira-issue-type: Bug
-          jira-labels: test,zap
+          jira-host: "jiraent.cms.gov"
+          jira-project-key: "EREGCSC"
+          jira-issue-type: "Bug"
+          jira-labels: "test,zap"
           jira-title-prefix: '[EREGCSC] - Zap : '
-          assign-jira-ticket-to: TTHO
+          assign-jira-ticket-to: "TTHO"
           zap-risk-code: '3'
           scan-output-path: 'report_json.json'
           scan-type: 'zap'
