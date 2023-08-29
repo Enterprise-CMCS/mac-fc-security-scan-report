@@ -31,7 +31,6 @@ const jiraheaders = {
   headers: {
     'Authorization': `Bearer ${token}`,
     'Content-Type': 'application/json',
-    'X-Atlassian-Token': 'no-check',
   },
 };
 
@@ -123,17 +122,17 @@ try {
             const issue = {
               "fields": {
                 "project": {
-                  "key": core.getInput('jira-project-key')
+                  "key":  `${core.getInput('jira-project-key')}`
                 },
-                "summary": core.getInput('jira-title-prefix').concat(' ', vulnerability.name),
-                "description": vulnerability.desc.concat('\n', vulnerability.instanceDesc),
+                "summary": `${core.getInput('jira-title-prefix').concat(' ', vulnerability.name)}`,
+                "description": `${vulnerability.desc.concat('\n', vulnerability.instanceDesc)}`,
                 "issuetype": {
-                  "name": core.getInput('jira-issue-type')
+                  "name": `${core.getInput('jira-issue-type')}`
                 },
                 "assignee": {
-                   "name": assignee ? username : null
+                   "name": `${assignee ? username : null}`
                 },
-                "labels": [ core.getInput('jira-labels').split(',') ],
+                "labels": [ `{core.getInput('jira-labels').split(',')}` ],
                 ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
               }
             };
