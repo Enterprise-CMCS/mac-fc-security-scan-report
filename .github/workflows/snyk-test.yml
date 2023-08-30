@@ -36,4 +36,4 @@ jobs:
           jira-title-prefix: '[MCR] - Snyk : '
           assign-jira-ticket-to: ${{ secrets.ACCOUNT_ID_MACB }}
           scan-output-path: 'snyk_output.txt'
-          scan-type: 'snyk' 
+          scan-type: 'snyk'
