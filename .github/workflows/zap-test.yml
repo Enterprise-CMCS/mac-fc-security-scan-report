@@ -25,11 +25,12 @@ jobs:
         with:
           jira-username: ${{ secrets.WORKSPACE_EMAIL }}
           jira-token: ${{ secrets.API_TOKEN }}
-          jira-host: arayateklu.atlassian.net
-          jira-project-key: MAC
+          jira-host: qmacbis.atlassian.net
+          jira-project-key: MDCT
           jira-issue-type: Task
+          jira-custom-field-key-value: '{ "customfield_10007" : "MDCT-2280", "customfield_14154" : [{"id": "16958", "value": "MCR"}]  }'
           jira-labels: test,zap
-          jira-title-prefix: '[MACFC] - Zap : '
+          jira-title-prefix: '[MCR] - Zap : '
           assign-jira-ticket-to: ${{ secrets.ACCOUNT_ID_AT }}
           zap-risk-code: '3'
           scan-output-path: 'report_json.json'
