@@ -36,7 +36,6 @@ async function doesUserExist(username) {
 
     if (response.status === 200) {
       // User exists (status code 200 OK)
-      console.log('^^^^User found^^^^^^:', response.data);
       return true;
     } else if (response.status === 404) {
       // User does not exist (status code 404 Not Found)
@@ -91,9 +90,6 @@ try {
         const searchResponse = await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
         
         const searchResult = searchResponse.data;
-        console.log(`***SEARCH RESPONSE ***` , searchResponse.status);
-        console.log('Matching issues found:', searchResult.issues);
-
         if (searchResponse.status === 200) {
           if (!searchResult.issues || searchResult.issues.length === 0) {
             
@@ -198,9 +194,6 @@ try {
         const searchResponse = await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
         
         const searchResult = searchResponse.data; 
-        console.log(`***SEARCH RESPONSE ***` , searchResponse.status);
-        console.log('Matching issues found:', searchResult.issues);  
-        
         if (searchResponse.status === 200) {
           if (!searchResult.issues || searchResult.issues.length === 0) {
             

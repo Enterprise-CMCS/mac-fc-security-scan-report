@@ -26,14 +26,14 @@ jobs:
       - name: use the custom github  action to parse Snyk output
         uses: ./
         with:
-          jira-username: ${{ secrets.MACB_USER }}
-          jira-token: ${{ secrets.MACB_TOKEN }}
-          jira-host: qmacbis.atlassian.net
-          jira-project-key: MDCT
+          jira-username: ${{ secrets.WORKSPACE_EMAIL }}
+          jira-token: ${{ secrets.API_TOKEN }}
+          jira-host: arayateklu.atlassian.net
+          jira-project-key: MAC
           jira-issue-type: Task
-          jira-custom-field-key-value: '{ "customfield_10007" : "MDCT-2280", "customfield_14154" : [{"id": "16958", "value": "MCR"}]  }'
+          # jira-custom-field-key-value: ''
           jira-labels: test,Snyk
-          jira-title-prefix: '[MCR] - Snyk : '
-          assign-jira-ticket-to: ${{ secrets.ACCOUNT_ID_MACB }}
+          jira-title-prefix: '[MACFC] - Snyk : '
+          assign-jira-ticket-to: ${{ secrets.ACCOUNT_ID_AT }}
           scan-output-path: 'snyk_output.txt'
           scan-type: 'snyk' 
