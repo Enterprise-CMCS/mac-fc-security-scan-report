@@ -10546,8 +10546,6 @@ try {
       try {
         const jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${vulnerability.name}" AND created >= startOfDay("-60d") AND status != "Canceled"`;
         const searchResponse = await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
-        // const jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${vulnerability.name}" AND created >= startOfDay("60d") AND status != "Canceled"`;
-        // const searchResponse = await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
         const searchResult = searchResponse.data;
         if (searchResponse.status === 200) {
           if (!searchResult.issues || searchResult.issues.length === 0) {
@@ -10648,7 +10646,7 @@ try {
       try {
  
         const title = vulnerability.title.replaceAll("\"", "\\\"");
-        const jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${vulnerability.title}" AND created >= startOfDay("-60d") AND status != "Canceled"`;
+        const jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${vulnerability.title}" AND created >= startOfDay("-360d") AND status != "Canceled"`;
         const searchResponse = await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
         
         const searchResult = searchResponse.data; 
