@@ -55,7 +55,7 @@ async function doesUserExist(username) {
 
     let response;
 
-    if (isJiraEnterprise) {
+    if (isJiraEnterprise === 'true') {
       response = await jira.get(`/rest/api/2/user?username=${username}`);
     } else {
       response = await jira.get(`/rest/api/2/user?accountId=${username}`);
@@ -115,7 +115,6 @@ try {
     async function createJiraTicket(vulnerability) {
       try {
         const jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${vulnerability.name}" AND created >= startOfDay("60d") AND status != "Canceled"`;
-        // const searchResponse = core.getInput('is_jira_enterprise') ? await jira_enterprise.get('/rest/api/2/search', { params: { jql: jqlQuery } }) : await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
         const searchResponse = await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
         const searchResult = searchResponse.data;
         if (searchResponse.status === 200) {
