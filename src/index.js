@@ -93,7 +93,7 @@ try {
 
     async function createJiraTicket(vulnerability) {
       try {
-        const jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${vulnerability.name}" AND created >= startOfDay("60d") AND status != "Closed"`;
+        const jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${vulnerability.name}" AND created >= startOfDay("60d") AND status != ${core.getInput("is_jira_enterprise") ? "Closed" : "Canceled"}`;
         const searchResponse = core.getInput('is_jira_enterprise') ? await jira_enterprise.get('/rest/api/2/search', { params: { jql: jqlQuery } }) : await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
         
         const searchResult = searchResponse.data;
@@ -101,10 +101,11 @@ try {
           if (!searchResult.issues || searchResult.issues.length === 0) {
             
             const username = core.getInput('assign-jira-ticket-to');
-            const assignee = await doesUserExist(username).catch(() => null);
+            const assignee_exist = await doesUserExist(username).catch(() => null);
             const customFieldKeyValue = core.getInput('jira-custom-field-key-value') ? JSON.parse(core.getInput('jira-custom-field-key-value')) : null;
             const customJiraFields = customFieldKeyValue ? { ...customFieldKeyValue } : null;
-  
+            const assignee_key = core.getInput('is_jira_enterprise') ? "name" : "accountId";
+            const assignee = { [assignee_key]: `${assignee_exist ? username : null}`}
             const issue = {
               "fields": {
                 "project": {
@@ -115,9 +116,7 @@ try {
                 "issuetype": {
                   "name": `${core.getInput('jira-issue-type')}`
                 },
-                "assignee": {
-                   "accountId": `${assignee ? username : null}`
-                },
+                "assignee": assignee,
                 "labels": core.getInput('jira-labels').split(','),
                 ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
               }
@@ -197,7 +196,7 @@ try {
       try {
  
         const title = vulnerability.title.replaceAll("\"", "\\\"");
-        const jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${vulnerability.title}" AND created >= startOfDay("-60d") AND status != "Canceled"`;
+        const jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${vulnerability.title}" AND created >= startOfDay("-60d") AND status != ${core.getInput("is_jira_enterprise") ? "Closed" : "Canceled"}`;
         const searchResponse = core.getInput('is_jira_enterprise') ? await jira_enterprise.get('/rest/api/2/search', { params: { jql: jqlQuery } }) : await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
         
         const searchResult = searchResponse.data; 
@@ -205,9 +204,13 @@ try {
           if (!searchResult.issues || searchResult.issues.length === 0) {
             
             const username = core.getInput('assign-jira-ticket-to');
-            const assignee = await doesUserExist(username).catch(() => null);
+            const assignee_exist = await doesUserExist(username).catch(() => null);
+            const assignee_key = core.getInput('is_jira_enterprise') ? "name" : "accountId";
+            const assignee = { [assignee_key]: `${assignee_exist ? username : null}`}
+
             const customFieldKeyValue = core.getInput('jira-custom-field-key-value') ? JSON.parse(core.getInput('jira-custom-field-key-value')) : null;
             const customJiraFields = customFieldKeyValue ? { ...customFieldKeyValue } : null;
+            
   
             const issue = {
               "fields": {
@@ -219,9 +222,7 @@ try {
                 "issuetype": {
                   "name": `${core.getInput('jira-issue-type')}`
                 },
-                "assignee": {
-                   "name": `${assignee ? username : null}`
-                },
+                "assignee": assignee,
                 "labels": core.getInput('jira-labels').split(','),
                 ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
               }
