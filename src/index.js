@@ -16,6 +16,14 @@ const installDependencies = (dependencies) => {
 };
 
 const token = core.getInput('jira-token');
+const jira_enterprise = axios.create({
+  baseURL: `https://${core.getInput('jira-host')}`,
+  headers: {
+    Authorization: `Bearer ${token}`,
+    'Content-Type': 'application/json',
+    'X-Atlassian-Token': 'no-check',
+  },
+});
 const jira = axios.create({
     baseURL: `https://${core.getInput('jira-host')}`,
     auth: {
@@ -32,8 +40,7 @@ const jira = axios.create({
 // Function to check if the user exists using the Jira REST API
 async function doesUserExist(username) {
   try { 
-    const response = await jira.get(`/rest/api/2/user?accountId=${username}`);
-
+    const response = core.getInput('is_jira_enterprise') ? await jira_enterprise.get(`/rest/api/2/user?username=${username}`) : await jira.get(`/rest/api/2/user?accountId=${username}`);
     if (response.status === 200) {
       // User exists (status code 200 OK)
       return true;
@@ -87,7 +94,7 @@ try {
     async function createJiraTicket(vulnerability) {
       try {
         const jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${vulnerability.name}" AND created >= startOfDay("-60d") AND status != "Canceled"`;
-        const searchResponse = await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
+        const searchResponse = core.getInput('is_jira_enterprise') ? await jira_enterprise.get('/rest/api/2/search', { params: { jql: jqlQuery } }) : await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
         
         const searchResult = searchResponse.data;
         if (searchResponse.status === 200) {
@@ -117,7 +124,7 @@ try {
             };
     
             const createIssueUrl = `/rest/api/2/issue`;
-            const issueResponse = await jira.post(createIssueUrl, issue,);
+            const issueResponse = core.getInput('is_jira_enterprise') ? await jira_enterprise.get(createIssueUrl, issue,) : await jira.post(createIssueUrl, issue);
     
             if (issueResponse.status === 201) {
               
@@ -191,7 +198,7 @@ try {
  
         const title = vulnerability.title.replaceAll("\"", "\\\"");
         const jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${vulnerability.title}" AND created >= startOfDay("-60d") AND status != "Canceled"`;
-        const searchResponse = await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
+        const searchResponse = core.getInput('is_jira_enterprise') ? await jira_enterprise.get('/rest/api/2/search', { params: { jql: jqlQuery } }) : await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
         
         const searchResult = searchResponse.data; 
         if (searchResponse.status === 200) {
@@ -221,10 +228,9 @@ try {
             };
     
             const createIssueUrl = `/rest/api/2/issue`;
-            const issueResponse = await jira.post(createIssueUrl, issue);
+            const issueResponse = core.getInput('is_jira_enterprise') ? await jira_enterprise.post(createIssueUrl, issue) : await jira.post(createIssueUrl, issue);
     
             if (issueResponse.status === 201) {
-              
               console.log(`Jira ticket created for vulnerability: ${vulnerability.name}`);
               return issueResponse.data;
             } else {

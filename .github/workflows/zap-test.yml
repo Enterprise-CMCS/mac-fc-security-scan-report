@@ -33,6 +33,7 @@ jobs:
           # jira-custom-field-key-value: '
           jira-labels: test,zap
           jira-title-prefix: '[MACFC] - Zap : '
+          is_jira_enterprise: false
           assign-jira-ticket-to: ${{ secrets.ACCOUNT_ID_MACB }}
           zap-risk-code: '3'
           scan-output-path: 'report_json.json'
