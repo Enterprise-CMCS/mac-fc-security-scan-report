@@ -28,7 +28,7 @@ jobs:
           jira-username: ${{ secrets.MACB_USER }}
           jira-token: ${{ secrets.MACB_TOKEN }}
           jira-host: qmacbis.atlassian.net
-          jira-project-key: MAC
+          jira-project-key: MDCT
           jira-issue-type: Task
           jira-custom-field-key-value: '{ "customfield_10007" : "MDCT-2280", "customfield_14154" : [{"id": "16958", "value": "MCR"}]  }'
           jira-labels: test,zap
