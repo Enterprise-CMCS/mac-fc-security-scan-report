@@ -15,26 +15,57 @@ const installDependencies = (dependencies) => {
   dependencies.forEach(dependency => installDependency(dependency));
 };
 
+// const token = core.getInput('jira-token');
+// const jira_enterprise = axios.create({
+//   baseURL: `https://${core.getInput('jira-host')}`,
+//   headers: {
+//     Authorization: `Bearer ${token}`,
+//     'Content-Type': 'application/json',
+//     // 'X-Atlassian-Token': 'no-check',
+//   },
+// });
+// const jira = axios.create({
+//     baseURL: `https://${core.getInput('jira-host')}`,
+//     auth: {
+//       username: core.getInput('jira-username'),
+//       password: core.getInput('jira-token'),
+//     },
+//     headers: {
+//       'Content-Type': 'application/json',
+//       // 'X-Atlassian-Token': 'no-check',
+//     },
+//   });
+
 const token = core.getInput('jira-token');
-const jira_enterprise = axios.create({
-  baseURL: `https://${core.getInput('jira-host')}`,
-  headers: {
-    Authorization: `Bearer ${token}`,
-    'Content-Type': 'application/json',
-    // 'X-Atlassian-Token': 'no-check',
-  },
-});
-const jira = axios.create({
-    baseURL: `https://${core.getInput('jira-host')}`,
-    auth: {
-      username: core.getInput('jira-username'),
-      password: core.getInput('jira-token'),
-    },
+const baseURL = `https://${core.getInput('jira-host')}`;
+const headers = {
+  'Content-Type': 'application/json',
+};
+
+let jira;
+const isJiraEnterprise = core.getInput('is_jira_enterprise') === 'true';
+
+if (isJiraEnterprise) {
+  jira = axios.create({
+    baseURL,
     headers: {
-      'Content-Type': 'application/json',
-      // 'X-Atlassian-Token': 'no-check',
+      ...headers,
+      Authorization: `Bearer ${token}`,
     },
   });
+} else {
+  const username = core.getInput('jira-username');
+  const password = core.getInput('jira-token');
+
+  jira = axios.create({
+    baseURL,
+    auth: {
+      username,
+      password,
+    },
+    headers,
+  });
+}
 
 
 // Function to check if the user exists using the Jira REST API
@@ -127,7 +158,7 @@ try {
             };
     
             const createIssueUrl = `/rest/api/2/issue`;
-            const issueResponse = core.getInput('is_jira_enterprise') ? await jira_enterprise.get(createIssueUrl, issue,) : await jira.post(createIssueUrl, issue);
+            const issueResponse = await jira.post(createIssueUrl, issue);
     
             if (issueResponse.status === 201) {
               
