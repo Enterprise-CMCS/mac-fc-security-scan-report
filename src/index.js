@@ -1,30 +1,42 @@
 const fs = require('fs');
-const JiraClient = require('jira-client');
+const axios = require('axios').default; 
 const core = require('@actions/core');
-const fetch = require('node-fetch');
+const path = require('path');
 
+// Install dependencies 
+const installDependency = (dependency) => {
+  core.startGroup(`Installing ${dependency}`);
+  const installResult = require('child_process').spawnSync('npm', ['install', dependency], { stdio: 'inherit' });
+  core.endGroup();
+  return installResult;
+};
 
-// Install jira-client
-core.startGroup('Installing jira-client');
-const installJiraClient = require('child_process').spawnSync('npm', ['install', 'jira-client'], { stdio: 'inherit' });
-core.endGroup();
+const installDependencies = (dependencies) => {
+  dependencies.forEach(dependency => installDependency(dependency));
+};
 
-// Install @actions/core
-core.startGroup('Installing @actions/core');
-const installActionsCore = require('child_process').spawnSync('npm', ['install', '@actions/core'], { stdio: 'inherit' });
-core.endGroup();
+const token = core.getInput('jira-token');
+const jira = axios.create({
+    baseURL: `https://${core.getInput('jira-host')}`,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
 
-// Install node-fetch
-core.startGroup('Installing node-fetch');
-const nodefetch = require('child_process').spawnSync('npm', ['install', 'node-fetch'], { stdio: 'inherit' });
-core.endGroup();
+const jiraheaders = {  
+  headers: {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json',
+  },
+};
 
 // Function to check if the user exists using the Jira REST API
-async function doesUserExist(accountId) {
+async function doesUserExist(username) {
   try {
     const username = core.getInput('jira-username');
     const token = core.getInput('jira-token'); 
-    const response = await fetch(`https://${core.getInput('jira-host')}/rest/api/3/user?accountId=${accountId}`, {
+    const response = await fetch(`https://${core.getInput('jira-host')}/rest/api/3/user?username=${username}`, {
       method: 'GET',
       headers: {
         'Authorization': `Basic ${Buffer.from(
@@ -103,8 +115,8 @@ try {
         const customFieldKeyValue = core.getInput('jira-custom-field-key-value') ? JSON.parse(core.getInput('jira-custom-field-key-value')) : null;
         const customJiraFields = customFieldKeyValue ? { ...customFieldKeyValue } : null;
 
-        const accountId = core.getInput('assign-jira-ticket-to');
-        const assignee = await doesUserExist(accountId).catch(() => null)
+        const username = core.getInput('assign-jira-ticket-to');
+        const assignee = await doesUserExist(username).catch(() => null)
 
         const issue = {
           fields: {
@@ -117,7 +129,7 @@ try {
               name: core.getInput('jira-issue-type'),
             },
             assignee: {
-              accountId: assignee ? accountId : null,
+              name: assignee ? username : null,
             },
             labels: core.getInput('jira-labels').split(','),
             ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
@@ -215,8 +227,8 @@ try {
         const customFieldKeyValue = core.getInput('jira-custom-field-key-value') ? JSON.parse(core.getInput('jira-custom-field-key-value')) : null;
         const customJiraFields = customFieldKeyValue ? { ...customFieldKeyValue } : null;
 
-        const accountId = core.getInput('assign-jira-ticket-to');
-        const assignee = await doesUserExist(accountId).catch(() => null)
+        const username = core.getInput('assign-jira-ticket-to');
+        const assignee = await doesUserExist(username).catch(() => null)
 
         const issue = {
           fields: {
@@ -229,7 +241,7 @@ try {
               name: core.getInput('jira-issue-type'),
             },
             assignee: {
-              accountId: assignee ? accountId : null,
+              name: assignee ? username : null,
             },
             labels: core.getInput('jira-labels').split(','),
             ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
