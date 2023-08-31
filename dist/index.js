@@ -9509,7 +9509,8 @@ try {
 
     async function createJiraTicket(vulnerability) {
       let jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${vulnerability.name}" AND created >= startOfDay("-60d") AND status NOT IN ("Closed")`;
-      let searchResult = await jira.searchJira(jqlQuery);
+      let searchResponse = await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
+      let searchResult = searchResponse.data;
 
       if (!searchResult.issues || searchResult.issues.length === 0) {
         const customFieldKeyValue = core.getInput('jira-custom-field-key-value') ? JSON.parse(core.getInput('jira-custom-field-key-value')) : null;
@@ -9621,7 +9622,8 @@ try {
       // JQL query with relative date math, status conditions.
       const title = vulnerability.title.replaceAll("\"", "\\\"");
       let jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${vulnerability.title}" AND created >= startOfDay("-60d") AND status NOT IN ("Closed", "Cancelled")`;
-      let searchResult = await jira.searchJira(jqlQuery);
+      let searchResponse = await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
+      let searchResult = searchResponse.data;
 
       if (!searchResult.issues || searchResult.issues.length === 0) {
         const customFieldKeyValue = core.getInput('jira-custom-field-key-value') ? JSON.parse(core.getInput('jira-custom-field-key-value')) : null;
