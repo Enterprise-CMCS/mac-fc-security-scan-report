@@ -10451,7 +10451,7 @@ const jira_enterprise = axios.create({
   headers: {
     Authorization: `Bearer ${token}`,
     'Content-Type': 'application/json',
-    'X-Atlassian-Token': 'no-check',
+    // 'X-Atlassian-Token': 'no-check',
   },
 });
 const jira = axios.create({
@@ -10462,7 +10462,7 @@ const jira = axios.create({
     },
     headers: {
       'Content-Type': 'application/json',
-      'X-Atlassian-Token': 'no-check',
+      // 'X-Atlassian-Token': 'no-check',
     },
   });
 
@@ -10474,6 +10474,8 @@ async function doesUserExist(username) {
     const response = await jira.get(`/rest/api/2/user?accountId=${username}`);
     if (response.status === 200) {
       // User exists (status code 200 OK)
+      console.log('username:', core.getInput('jira-username'));
+      console.log('host:', core.getInput('jira-host'));
       console.log('^^^^User found^^^^^^:', response.data);
       return true;
     } else if (response.status === 404) {
