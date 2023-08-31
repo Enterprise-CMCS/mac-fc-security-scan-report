@@ -36,4 +36,4 @@ jobs:
           assign-jira-ticket-to: ${{ secrets.ACCOUNT_ID_MACB }}
           zap-risk-code: '3'
           scan-output-path: 'report_json.json'
-          scan-type: 'zap'
+          scan-type: 'zap' 
