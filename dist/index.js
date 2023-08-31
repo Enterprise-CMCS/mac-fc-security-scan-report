@@ -10473,6 +10473,7 @@ async function doesUserExist(username) {
     const response = core.getInput('is_jira_enterprise') ? await jira_enterprise.get(`/rest/api/2/user?username=${username}`) : await jira.get(`/rest/api/2/user?accountId=${username}`);
     if (response.status === 200) {
       // User exists (status code 200 OK)
+      console.log('^^^^User found^^^^^^:', response.data);
       return true;
     } else if (response.status === 404) {
       // User does not exist (status code 404 Not Found)
