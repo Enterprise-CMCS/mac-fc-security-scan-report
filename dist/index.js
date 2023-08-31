@@ -10470,7 +10470,8 @@ const jira = axios.create({
 // Function to check if the user exists using the Jira REST API
 async function doesUserExist(username) {
   try { 
-    const response = core.getInput('is_jira_enterprise') ? await jira_enterprise.get(`/rest/api/2/user?username=${username}`) : await jira.get(`/rest/api/2/user?accountId=${username}`);
+    // const response = core.getInput('is_jira_enterprise') ? await jira_enterprise.get(`/rest/api/2/user?username=${username}`) : await jira.get(`/rest/api/2/user?accountId=${username}`);
+    const response = await jira.get(`/rest/api/2/user?accountId=${username}`);
     if (response.status === 200) {
       // User exists (status code 200 OK)
       console.log('^^^^User found^^^^^^:', response.data);
@@ -10525,8 +10526,8 @@ try {
     async function createJiraTicket(vulnerability) {
       try {
         const jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${vulnerability.name}" AND created >= startOfDay("60d") AND status != "Canceled"`;
-        const searchResponse = core.getInput('is_jira_enterprise') ? await jira_enterprise.get('/rest/api/2/search', { params: { jql: jqlQuery } }) : await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
-        
+        // const searchResponse = core.getInput('is_jira_enterprise') ? await jira_enterprise.get('/rest/api/2/search', { params: { jql: jqlQuery } }) : await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
+        const searchResponse = await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
         const searchResult = searchResponse.data;
         if (searchResponse.status === 200) {
           if (!searchResult.issues || searchResult.issues.length === 0) {
