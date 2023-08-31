@@ -10445,27 +10445,6 @@ const installDependencies = (dependencies) => {
   dependencies.forEach(dependency => installDependency(dependency));
 };
 
-// const token = core.getInput('jira-token');
-// const jira_enterprise = axios.create({
-//   baseURL: `https://${core.getInput('jira-host')}`,
-//   headers: {
-//     Authorization: `Bearer ${token}`,
-//     'Content-Type': 'application/json',
-//     // 'X-Atlassian-Token': 'no-check',
-//   },
-// });
-// const jira = axios.create({
-//     baseURL: `https://${core.getInput('jira-host')}`,
-//     auth: {
-//       username: core.getInput('jira-username'),
-//       password: core.getInput('jira-token'),
-//     },
-//     headers: {
-//       'Content-Type': 'application/json',
-//       // 'X-Atlassian-Token': 'no-check',
-//     },
-//   });
-
 const token = core.getInput('jira-token');
 const baseURL = `https://${core.getInput('jira-host')}`;
 const headers = {
@@ -10473,9 +10452,9 @@ const headers = {
 };
 
 let jira;
-const isJiraEnterprise = core.getInput('is_jira_enterprise') === 'true';
+const isJiraEnterprise = core.getInput('is_jira_enterprise');
 
-if (isJiraEnterprise) {
+if (isJiraEnterprise === 'true') {
   jira = axios.create({
     baseURL,
     headers: {
@@ -10483,7 +10462,7 @@ if (isJiraEnterprise) {
       Authorization: `Bearer ${token}`,
     },
   });
-} else {
+} else if (isJiraEnterprise === 'false'){
   const username = core.getInput('jira-username');
   const password = core.getInput('jira-token');
 
@@ -10495,18 +10474,25 @@ if (isJiraEnterprise) {
     },
     headers,
   });
+} else {
+  console.error('Invalid jira istance type. Please provide "true" if the jira instance is enterprise version or "false" otherwise.');
 }
 
 
 // Function to check if the user exists using the Jira REST API
 async function doesUserExist(username) {
   try { 
-    // const response = core.getInput('is_jira_enterprise') ? await jira_enterprise.get(`/rest/api/2/user?username=${username}`) : await jira.get(`/rest/api/2/user?accountId=${username}`);
-    const response = await jira.get(`/rest/api/2/user?accountId=${username}`);
+
+    let response;
+
+    if (isJiraEnterprise) {
+      response = await jira.get(`/rest/api/2/user?username=${username}`);
+    } else {
+      response = await jira.get(`/rest/api/2/user?accountId=${username}`);
+    }
+
     if (response.status === 200) {
       // User exists (status code 200 OK)
-      console.log('username:', core.getInput('jira-username'));
-      console.log('host:', core.getInput('jira-host'));
       console.log('^^^^User found^^^^^^:', response.data);
       return true;
     } else if (response.status === 404) {
@@ -10662,7 +10648,7 @@ try {
  
         const title = vulnerability.title.replaceAll("\"", "\\\"");
         const jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${vulnerability.title}" AND created >= startOfDay("-60d") AND status != "Canceled"`;
-        const searchResponse = core.getInput('is_jira_enterprise') ? await jira_enterprise.get('/rest/api/2/search', { params: { jql: jqlQuery } }) : await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
+        const searchResponse = await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
         
         const searchResult = searchResponse.data; 
         if (searchResponse.status === 200) {
@@ -10694,7 +10680,7 @@ try {
             };
     
             const createIssueUrl = `/rest/api/2/issue`;
-            const issueResponse = core.getInput('is_jira_enterprise') ? await jira_enterprise.post(createIssueUrl, issue) : await jira.post(createIssueUrl, issue);
+            const issueResponse = await jira.post(createIssueUrl, issue);
     
             if (issueResponse.status === 201) {
               console.log(`Jira ticket created for vulnerability: ${vulnerability.name}`);
