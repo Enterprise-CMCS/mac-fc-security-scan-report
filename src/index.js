@@ -65,15 +65,6 @@ async function doesUserExist(username) {
 }
 
 try {
-  const jira = new JiraClient({
-    protocol: 'https',
-    host: core.getInput('jira-host'),
-    username: core.getInput('jira-username'),
-    password: core.getInput('jira-token'),
-    apiVersion: '2',
-    strictSSL: true,
-  });
-
   const scanType = core.getInput('scan-type');
   if (scanType === 'zap') {
     // Parse the JSON file from Zap scan
