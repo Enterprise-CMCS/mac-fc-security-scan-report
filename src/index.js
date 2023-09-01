@@ -56,6 +56,7 @@ async function doesUserExist(username) {
 
     if (response.status === 200) {
       // User exists (status code 200 OK)
+      console.log('^^^^User found^^^^^^:', response.data);
       return true;
     } else if (response.status === 404) {
       // User does not exist (status code 404 Not Found)
