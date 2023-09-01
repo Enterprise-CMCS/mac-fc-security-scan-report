@@ -114,7 +114,7 @@ try {
       return vulnerabilities;
     }
 
-    async function createJiraTicket(vulnerability) {
+    async function createZapJiraTicket(vulnerability) {
       try {
         const jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${vulnerability.name}" AND created >= startOfDay("-60d") AND status != "Canceled"`;
         const searchResponse = await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
@@ -127,11 +127,6 @@ try {
             const assignee_exist = await doesUserExist(username).catch(() => null);
             const assignee_key = `${core.getInput('is_jira_enterprise') === 'true' ? "name" : "accountId"}`;
             const assignee = { [assignee_key]: `${assignee_exist ? username : null}`}
-
-            console.log(`****Username: ${username}`);
-            console.log(`****Assignee exists: ${assignee_exist}`);
-            console.log(`****Assignee:`, assignee);
-            console.log(`****isJiraEnterprise:`, isJiraEnterprise);
 
             const customFieldKeyValue = core.getInput('jira-custom-field-key-value') ? JSON.parse(core.getInput('jira-custom-field-key-value')) : null;
             const customJiraFields = customFieldKeyValue ? { ...customFieldKeyValue } : null;
@@ -191,7 +186,7 @@ try {
       for (const vulnerability of uniqueVulnerabilities) {
         try {
           console.log(`Creating Jira ticket for vulnerability: ${vulnerability.name}`);
-          const resp = await createJiraTicket(vulnerability);
+          const resp = await createZapJiraTicket(vulnerability);
           console.log(resp);
         } catch (error) {
           console.error(`Error while creating Jira ticket for vulnerability ${vulnerability.name}:`, error);
@@ -222,7 +217,7 @@ try {
       return vulnerabilities;
     }
 
-    async function createJiraTicket(vulnerability) {
+    async function createSnykJiraTicket(vulnerability) {
       try {
  
         const title = vulnerability.title.replaceAll("\"", "\\\"");
@@ -237,11 +232,6 @@ try {
             const assignee_exist = await doesUserExist(username).catch(() => null);
             const assignee_key = `${core.getInput('is_jira_enterprise') === 'true' ? "name" : "accountId"}`;
             const assignee = { [assignee_key]: `${assignee_exist ? username : null}`}
-
-            console.log(`****Username: ${username}`);
-            console.log(`****Assignee exists: ${assignee_exist}`);
-            console.log(`****Assignee:`, assignee);
-            console.log(`****isJiraEnterprise:`, isJiraEnterprise);
 
             const customFieldKeyValue = core.getInput('jira-custom-field-key-value') ? JSON.parse(core.getInput('jira-custom-field-key-value')) : null;
             const customJiraFields = customFieldKeyValue ? { ...customFieldKeyValue } : null;
@@ -267,21 +257,21 @@ try {
     
             if (issueResponse.status === 201) {
               
-              console.log(`Jira ticket created for vulnerability: ${vulnerability.name}`);
+              console.log(`Jira ticket created for vulnerability: ${vulnerability.title}`);
               return issueResponse.data;
             } else {
               console.error(`Error creating Jira ticket. Unexpected response status: ${issueResponse.status} ${issueResponse.statusText}`);
               return null;
             }
           } else {
-            console.log(`Active Jira ticket already exists for vulnerability: ${vulnerability.name}`);
+            console.log(`Active Jira ticket already exists for vulnerability: ${vulnerability.title}`);
           }
         } else {
           console.error(`Error querying Jira. Unexpected response status: ${searchResponse.status} ${searchResponse.statusText}`);
           return null;
         }
       } catch (error) {
-        console.error(`Error while creating Jira ticket for vulnerability ${vulnerability.name}:`, error);
+        console.error(`Error while creating Jira ticket for vulnerability ${vulnerability.title}:`, error);
         return null;
       }
     }
@@ -301,7 +291,7 @@ try {
       for (const vulnerability of uniqueVulnerabilities) {
         try {
           console.log(`Creating Jira ticket for vulnerability: ${vulnerability.title}`);
-          const resp = await createJiraTicket(vulnerability);
+          const resp = await createSnykJiraTicket(vulnerability);
           console.log(resp)
         } catch (error) {
           console.error(`Error while creating Jira ticket for vulnerability ${vulnerability.title}:`, error);
