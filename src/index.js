@@ -45,7 +45,7 @@ if (isJiraEnterprise === 'true') {
     headers,
   });
 } else {
-  console.error('Invalid jira istance type. Please provide "true" if the jira instance is enterprise version or "false" otherwise.');
+  console.error('Invalid jira instance type. Please provide "true" if the jira instance is enterprise version or "false" otherwise.');
 }
 
 
@@ -114,7 +114,10 @@ try {
           if (!searchResult.issues || searchResult.issues.length === 0) {
             
             const username = core.getInput('assign-jira-ticket-to');
-            const assignee = await doesUserExist(username).catch(() => null);
+            const assignee_exist = await doesUserExist(username).catch(() => null);
+            const assignee_key = core.getInput('is_jira_enterprise') ? "name" : "accountId";
+            const assignee = { [assignee_key]: `${assignee_exist ? username : null}`}
+
             const customFieldKeyValue = core.getInput('jira-custom-field-key-value') ? JSON.parse(core.getInput('jira-custom-field-key-value')) : null;
             const customJiraFields = customFieldKeyValue ? { ...customFieldKeyValue } : null;
   
@@ -128,9 +131,7 @@ try {
                 "issuetype": {
                   "name": `${core.getInput('jira-issue-type')}`
                 },
-                "assignee": {
-                   "accountId": `${assignee ? username : null}`
-                },
+                "assignee": assignee,
                 "labels": core.getInput('jira-labels').split(','),
                 ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
               }
@@ -219,6 +220,8 @@ try {
             
             const username = core.getInput('assign-jira-ticket-to');
             const assignee = await doesUserExist(username).catch(() => null);
+
+
             const customFieldKeyValue = core.getInput('jira-custom-field-key-value') ? JSON.parse(core.getInput('jira-custom-field-key-value')) : null;
             const customJiraFields = customFieldKeyValue ? { ...customFieldKeyValue } : null;
   
