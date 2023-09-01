@@ -10481,9 +10481,8 @@ if (isJiraEnterprise === 'true') {
 
 // Function to check if the user exists using the Jira REST API
 async function doesUserExist(username) {
-  try {
-
-    response = await jira.get(`/rest/api/2/user?accountId=${username}`);
+  try { 
+    const response = await jira.get(`/rest/api/2/user?accountId=${username}`);
 
     if (response.status === 200) {
       // User exists (status code 200 OK)
