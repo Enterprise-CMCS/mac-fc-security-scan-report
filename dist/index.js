@@ -10482,11 +10482,14 @@ if (isJiraEnterprise === 'true') {
 // Function to check if the user exists using the Jira REST API
 async function doesUserExist(username) {
   try { 
+    console.log('Before API request');
     let response;
 
     if (isJiraEnterprise === 'true') {
+      console.log('Making API request with username');
       response = await jira.get(`/rest/api/2/user?username=${username}`);
     } else {
+      console.log('Making API request with accountId');
       response = await jira.get(`/rest/api/2/user?accountId=${username}`);
     }
 
