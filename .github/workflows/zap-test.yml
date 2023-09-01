@@ -29,7 +29,7 @@ jobs:
           jira-token: ${{ secrets.API_TOKEN }}
           jira-host: arayateklu.atlassian.net
           jira-project-key: MAC
-          jira-issue-type: Task
+          jira-issue-type: Epic
           jira-labels: test,zap
           jira-title-prefix: '[MACFC] - Zap : '
           # jira-custom-field-key-value: ''
