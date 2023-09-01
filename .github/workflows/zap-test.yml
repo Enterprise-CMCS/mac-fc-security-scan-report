@@ -34,7 +34,7 @@ jobs:
           jira-labels: test,zap
           jira-title-prefix: '[MCR] - Zap : '
           is_jira_enterprise: false
-          assign-jira-ticket-to: '620e936fa715c6006914c7d2'
+          assign-jira-ticket-to: ${{ secrets.ACCOUNT_ID_MACB }}
           zap-risk-code: '3'
           scan-output-path: 'report_json.json'
           scan-type: 'zap' 

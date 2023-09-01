@@ -10546,7 +10546,7 @@ try {
             
             const username = core.getInput('assign-jira-ticket-to');
             const assignee_exist = await doesUserExist(username).catch(() => null);
-            const assignee_key = `${core.getInput('is_jira_enterprise') ? "name" : "accountId"}`;
+            const assignee_key = `${core.getInput('is_jira_enterprise') === 'true' ? "name" : "accountId"}`;
             const assignee = { [assignee_key]: `${assignee_exist ? username : null}`}
 
             console.log(`****Username: ${username}`);
@@ -10655,8 +10655,14 @@ try {
           if (!searchResult.issues || searchResult.issues.length === 0) {
             
             const username = core.getInput('assign-jira-ticket-to');
-            const assignee = await doesUserExist(username).catch(() => null);
+            const assignee_exist = await doesUserExist(username).catch(() => null);
+            const assignee_key = `${core.getInput('is_jira_enterprise') === 'true' ? "name" : "accountId"}`;
+            const assignee = { [assignee_key]: `${assignee_exist ? username : null}`}
 
+            console.log(`****Username: ${username}`);
+            console.log(`****Assignee exists: ${assignee_exist}`);
+            console.log(`****Assignee:`, assignee);
+            console.log(`****isJiraEnterprise:`, isJiraEnterprise);
 
             const customFieldKeyValue = core.getInput('jira-custom-field-key-value') ? JSON.parse(core.getInput('jira-custom-field-key-value')) : null;
             const customJiraFields = customFieldKeyValue ? { ...customFieldKeyValue } : null;
@@ -10671,9 +10677,7 @@ try {
                 "issuetype": {
                   "name": `${core.getInput('jira-issue-type')}`
                 },
-                "assignee": {
-                   "name": `${assignee ? username : null}`
-                },
+                "assignee": assignee,
                 "labels": core.getInput('jira-labels').split(','),
                 ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
               }
