@@ -10482,18 +10482,10 @@ if (isJiraEnterprise === 'true') {
 // Function to check if the user exists using the Jira REST API
 async function doesUserExist(username) {
   try { 
-
-    let response;
-
-    if (isJiraEnterprise === 'true') {
-      response = await jira.get(`/rest/api/2/user?username=${username}`);
-    } else {
-      response = await jira.get(`/rest/api/2/user?accountId=${username}`);
-    }
+    const response = await jira.get(`/rest/api/2/user?accountId=${username}`);
 
     if (response.status === 200) {
       // User exists (status code 200 OK)
-      console.log('^^^^User found^^^^^^:', response.data);
       return true;
     } else if (response.status === 404) {
       // User does not exist (status code 404 Not Found)
@@ -10546,16 +10538,16 @@ try {
       try {
         const jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${vulnerability.name}" AND created >= startOfDay("-60d") AND status != "Canceled"`;
         const searchResponse = await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
+        
         const searchResult = searchResponse.data;
         if (searchResponse.status === 200) {
           if (!searchResult.issues || searchResult.issues.length === 0) {
             
             const username = core.getInput('assign-jira-ticket-to');
-            const assignee_exist = await doesUserExist(username).catch(() => null);
+            const assignee = await doesUserExist(username).catch(() => null);
             const customFieldKeyValue = core.getInput('jira-custom-field-key-value') ? JSON.parse(core.getInput('jira-custom-field-key-value')) : null;
             const customJiraFields = customFieldKeyValue ? { ...customFieldKeyValue } : null;
-            const assignee_key = core.getInput('is_jira_enterprise') ? "name" : "accountId";
-            const assignee = { [assignee_key]: `${assignee_exist ? username : null}`};
+  
             const issue = {
               "fields": {
                 "project": {
@@ -10566,14 +10558,16 @@ try {
                 "issuetype": {
                   "name": `${core.getInput('jira-issue-type')}`
                 },
-                "assignee": assignee,
+                "assignee": {
+                   "accountId": `${assignee ? username : null}`
+                },
                 "labels": core.getInput('jira-labels').split(','),
                 ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
               }
             };
     
             const createIssueUrl = `/rest/api/2/issue`;
-            const issueResponse = await jira.post(createIssueUrl, issue);
+            const issueResponse = await jira.post(createIssueUrl, issue,);
     
             if (issueResponse.status === 201) {
               
@@ -10646,7 +10640,7 @@ try {
       try {
  
         const title = vulnerability.title.replaceAll("\"", "\\\"");
-        const jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${vulnerability.title}" AND created >= startOfDay("-360d") AND status != "Canceled"`;
+        const jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${vulnerability.title}" AND created >= startOfDay("-60d") AND status != "Canceled"`;
         const searchResponse = await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
         
         const searchResult = searchResponse.data; 
@@ -10654,13 +10648,9 @@ try {
           if (!searchResult.issues || searchResult.issues.length === 0) {
             
             const username = core.getInput('assign-jira-ticket-to');
-            const assignee_exist = await doesUserExist(username).catch(() => null);
-            const assignee_key = core.getInput('is_jira_enterprise') ? "name" : "accountId";
-            const assignee = { [assignee_key]: `${assignee_exist ? username : null}`};
-
+            const assignee = await doesUserExist(username).catch(() => null);
             const customFieldKeyValue = core.getInput('jira-custom-field-key-value') ? JSON.parse(core.getInput('jira-custom-field-key-value')) : null;
             const customJiraFields = customFieldKeyValue ? { ...customFieldKeyValue } : null;
-            
   
             const issue = {
               "fields": {
@@ -10672,7 +10662,9 @@ try {
                 "issuetype": {
                   "name": `${core.getInput('jira-issue-type')}`
                 },
-                "assignee": assignee,
+                "assignee": {
+                   "name": `${assignee ? username : null}`
+                },
                 "labels": core.getInput('jira-labels').split(','),
                 ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
               }
@@ -10682,6 +10674,7 @@ try {
             const issueResponse = await jira.post(createIssueUrl, issue);
     
             if (issueResponse.status === 201) {
+              
               console.log(`Jira ticket created for vulnerability: ${vulnerability.name}`);
               return issueResponse.data;
             } else {
