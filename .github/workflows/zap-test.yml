@@ -25,16 +25,16 @@ jobs:
       - name: Run Jira Ticket Creator
         uses: ./
         with:
-          jira-username: ${{ secrets.MACB_USER }}
-          jira-token: ${{ secrets.MACB_TOKEN }}
-          jira-host: 'qmacbis.atlassian.net'
-          jira-project-key: MDCT
+          jira-username: ${{ secrets.WORKSPACE_EMAIL }}
+          jira-token: ${{ secrets.API_TOKEN }}
+          jira-host: arayateklu.atlassian.net
+          jira-project-key: MAC
           jira-issue-type: Task
-          jira-custom-field-key-value: '{ "customfield_10007" : "MDCT-2280", "customfield_14154" : [{"id": "16958", "value": "MCR"}]  }'
           jira-labels: test,zap
-          jira-title-prefix: '[MCR] - Zap : '
+          jira-title-prefix: '[MACFC] - Zap : '
+          # jira-custom-field-key-value: ''
+          assign-jira-ticket-to: ${{ secrets.ACCOUNT_ID_AT }}
           is_jira_enterprise: false
-          assign-jira-ticket-to: ${{ secrets.ACCOUNT_ID_MACB }}
           zap-risk-code: '3'
           scan-output-path: 'report_json.json'
           scan-type: 'zap' 
