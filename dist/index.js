@@ -10549,6 +10549,10 @@ try {
             const assignee_key = core.getInput('is_jira_enterprise') ? "name" : "accountId";
             const assignee = { [assignee_key]: `${assignee_exist ? username : null}`}
 
+            console.log(`****Username: ${username}`);
+            console.log(`****Assignee exists: ${assignee_exist}`);
+            console.log(`****Assignee:`, assignee);
+
             const customFieldKeyValue = core.getInput('jira-custom-field-key-value') ? JSON.parse(core.getInput('jira-custom-field-key-value')) : null;
             const customJiraFields = customFieldKeyValue ? { ...customFieldKeyValue } : null;
   
