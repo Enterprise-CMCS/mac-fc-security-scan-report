@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - main
-      - atlass-enterp
   pull_request:
     branches: [ main ]
 
@@ -11,7 +10,7 @@ on:
 jobs:
   create_ticket:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' || 'push'
+    if: github.event_name == 'pull_request'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
