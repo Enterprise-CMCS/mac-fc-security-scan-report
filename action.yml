@@ -26,7 +26,7 @@ inputs:
   jira-title-prefix:
     description: 'Jira issue title prefix to apply'
   is_jira_enterprise:
-    description: 'is the Jira instance enterprise, set true if it is enterprise and false if not'
+    description: 'is the Jira instance enterprise, set true if it is enterprise and false if otherwise'
     required: true
   assign-jira-ticket-to:
     description: 'the assignee accountId to assign the Jira ticket to}'
