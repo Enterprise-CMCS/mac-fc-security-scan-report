@@ -34,25 +34,14 @@ const jiraheaders = {
 // Function to check if the user exists using the Jira REST API
 async function doesUserExist(username) {
   try {
-    const username = core.getInput('jira-username');
     const token = core.getInput('jira-token'); 
-    const response = await fetch(`https://${core.getInput('jira-host')}/rest/api/3/user?username=${username}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Basic ${Buffer.from(
-          `${username}:${token}`
-        ).toString('base64')}`,
-        'Accept': 'application/json'
-      }
-    });
+    const response = await jira.get(`https://${core.getInput('jira-host')}/rest/api/2/user?username=${username}`, jiraheaders);
 
     if (response.status === 200) {
       // User exists (status code 200 OK)
-      console.log(response.status);
       return true;
     } else if (response.status === 404) {
       // User does not exist (status code 404 Not Found)
-      console.log(response.status);
       return false;
     } else {
       // Handle other response statuses if needed
@@ -128,7 +117,8 @@ try {
           },
         };
 
-        const issueResponse = await jira.addNewIssue(issue);
+        const createIssueUrl = `https://${core.getInput('jira-host')}/rest/api/2/issue`;
+        const issueResponse = await jira.post(createIssueUrl, issue, jiraheaders);
         console.log(`Jira ticket created for vulnerability: ${vulnerability.name}`);
 
         process.env.SCAN_OUTPUT_FILE_PATH = core.getInput('scan-output-path');
@@ -241,7 +231,8 @@ try {
           },
         };
 
-        const issueResponse = await jira.addNewIssue(issue);
+        const createIssueUrl = `https://${core.getInput('jira-host')}/rest/api/2/issue`;
+        const issueResponse = await jira.post(createIssueUrl, issue, jiraheaders);
         console.log(`Jira ticket created for vulnerability: ${vulnerability.title}`);
 
         process.env.SCAN_OUTPUT_FILE_PATH = core.getInput('scan-output-path');
