@@ -126,7 +126,7 @@ try {
 
         try {
           // Use the addAttachmentOnIssue method from the Jira library
-          await jira.addAttachmentOnIssue(issueResponse.key, fs.createReadStream(scanOutputFilePath));
+          //await jira.addAttachmentOnIssue(issueResponse.key, fs.createReadStream(scanOutputFilePath));
           console.log(`Jira ticket ${issueResponse.key} created successfully.`);
         } catch (error) {
           console.error(`Error adding attachment to Jira ticket ${issueResponse.key}:`, error);
@@ -239,7 +239,7 @@ try {
         const scanOutputFilePath = process.env.SCAN_OUTPUT_FILE_PATH
         try {
           // Use the addAttachmentOnIssue method from Jira library
-          await jira.addAttachmentOnIssue(issueResponse.key, fs.createReadStream(scanOutputFilePath));
+          //await jira.addAttachmentOnIssue(issueResponse.key, fs.createReadStream(scanOutputFilePath));
           console.log(`Jira ticket ${issueResponse.key} created successfully.`);
         } catch (error) {
           console.error(`Error adding attachment to Jira ticket ${issueResponse.key}:`, error);
