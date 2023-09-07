@@ -10,7 +10,7 @@ on:
 jobs:
   create_ticket:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' || 'push'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
