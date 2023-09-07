@@ -30,8 +30,10 @@ jobs:
           jira-host: arayateklu.atlassian.net
           jira-project-key: MAC
           jira-issue-type: Task
+          # jira-custom-field-key-value: ''
           jira-labels: test,Snyk
           jira-title-prefix: '[MACFC] - Snyk : '
+          is_jira_enterprise: false
           assign-jira-ticket-to: ${{ secrets.ACCOUNT_ID_AT }}
           scan-output-path: 'snyk_output.txt'
           scan-type: 'snyk' 
