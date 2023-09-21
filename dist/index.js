@@ -10490,7 +10490,7 @@ async function doesUserExist(username) {
       response = await jira.get(`/rest/api/2/user?accountId=${username}`);
     } else {
       console.log('Invalid isJiraEnterprise value:', isJiraEnterprise);
-      return false; // Handle invalid input
+      process.exit(1);
     }
 
     if (response.status === 200) {
@@ -10537,6 +10537,7 @@ try {
           }
         } catch (error) {
           console.error('Error parsing Zap output:', error);
+          process.exit(1);
         }
       }
       console.log(vulnerabilities);
@@ -10585,18 +10586,18 @@ try {
               return issueResponse.data;
             } else {
               console.error(`Error creating Jira ticket. Unexpected response status: ${issueResponse.status} ${issueResponse.statusText}`);
-              return null;
+              process.exit(1);
             }
           } else {
             console.log(`Active Jira ticket already exists for vulnerability: ${vulnerability.name}`);
           }
         } else {
           console.error(`Error querying Jira. Unexpected response status: ${searchResponse.status} ${searchResponse.statusText}`);
-          return null;
+          process.exit(1);
         }
       } catch (error) {
         console.error(`Error while creating Jira ticket for vulnerability ${vulnerability.name}:`, error);
-        return null;
+        process.exit(1);
       }
     }
 
@@ -10619,6 +10620,7 @@ try {
           console.log(resp);
         } catch (error) {
           console.error(`Error while creating Jira ticket for vulnerability ${vulnerability.name}:`, error);
+          process.exit(1);
         }
       }
     })();
@@ -10640,6 +10642,7 @@ try {
           }
         } catch (error) {
           console.error('Error parsing Snyk output:', error);
+          process.exit(1);
           // vulnerabilities = parseNonJsonData(inputData);
         }
       }
@@ -10690,18 +10693,18 @@ try {
               return issueResponse.data;
             } else {
               console.error(`Error creating Jira ticket. Unexpected response status: ${issueResponse.status} ${issueResponse.statusText}`);
-              return null;
+              process.exit(1);
             }
           } else {
             console.log(`Active Jira ticket already exists for vulnerability: ${vulnerability.title}`);
           }
         } else {
           console.error(`Error querying Jira. Unexpected response status: ${searchResponse.status} ${searchResponse.statusText}`);
-          return null;
+          process.exit(1);
         }
       } catch (error) {
         console.error(`Error while creating Jira ticket for vulnerability ${vulnerability.title}:`, error);
-        return null;
+        process.exit(1);
       }
     }
 
@@ -10724,6 +10727,7 @@ try {
           console.log(resp)
         } catch (error) {
           console.error(`Error while creating Jira ticket for vulnerability ${vulnerability.title}:`, error);
+          process.exit(1);
         }
       }
 
@@ -10731,10 +10735,11 @@ try {
   } else {
     console.error('Invalid scan-type provided. Please provide either "snyk" or "zap".');
     core.setFailed('Invalid scan-type provided');
+    process.exit(1);
   }
 } catch (error) {
-  console.error(`Error while creating Jira ticket for vulnerability ${vulnerability.title}:`, error);
   core.setFailed(error.message);
+  process.exit(1);
 }
 })();
 
