@@ -303,5 +303,6 @@ try {
     core.setFailed('Invalid scan-type provided');
   }
 } catch (error) {
+  console.error(`Error while creating Jira ticket for vulnerability ${vulnerability.title}:`, error);
   core.setFailed(error.message);
 }
