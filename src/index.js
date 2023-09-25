@@ -46,6 +46,7 @@ if (isJiraEnterprise === 'true') {
   });
 } else {
   console.error('Invalid jira instance type. Please provide "true" if the jira instance is enterprise version or "false" otherwise.');
+  process.exit(1);
 }
 
 
