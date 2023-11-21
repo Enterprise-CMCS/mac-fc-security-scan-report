@@ -2,7 +2,7 @@ name: Snyk Jira Ticket Creation Workflow
 on:
   push:
     branches:
-      - main
+      - test
   pull_request:
     branches: [ main ]
 jobs:
