@@ -3,32 +3,25 @@ const axios = require('axios').default;
 const core = require('@actions/core');
 const path = require('path');
 
-// Install dependencies 
-const installDependency = (dependency) => {
-  core.startGroup(`Installing ${dependency}`);
-  const installResult = require('child_process').spawnSync('npm', ['install', dependency], { stdio: 'inherit' });
-  core.endGroup();
-  return installResult;
-};
+// Install jira-client
+core.startGroup('Installing jira-client');
+const installJiraClient = require('child_process').spawnSync('npm', ['install', 'jira-client'], { stdio: 'inherit' });
+core.endGroup();
 
-const installDependencies = (dependencies) => {
-  dependencies.forEach(dependency => installDependency(dependency));
-};
+// Install axios
+core.startGroup('Installing axios');
+const installAxios = require('child_process').spawnSync('npm', ['install', 'axios'], { stdio: 'inherit' });
+core.endGroup();
 
-try {
-  // List of dependencies to install
-  const dependenciesToInstall = ['axios', 'path', '@actions/core'];
+// Install @actions/core
+core.startGroup('Installing @actions/core');
+const installActionsCore = require('child_process').spawnSync('npm', ['install', '@actions/core'], { stdio: 'inherit' });
+core.endGroup();
 
-  // Install dependencies
-  installDependencies(dependenciesToInstall);
-
-  // Rest of your workflow script...
-  // ...
-
-} catch (error) {
-  core.setFailed(error.message);
-  process.exit(5);
-}
+// Install path
+core.startGroup('Installing path module');
+const pathInstall = require('child_process').spawnSync('npm', ['install', 'path'], { stdio: 'inherit' });
+core.endGroup();
 
 const token = core.getInput('jira-token');
 const baseURL = `https://${core.getInput('jira-host')}`;

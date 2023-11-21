@@ -87,32 +87,25 @@ const axios = (__nccwpck_require__(383)["default"]);
 const core = __nccwpck_require__(320);
 const path = __nccwpck_require__(17);
 
-// Install dependencies 
-const installDependency = (dependency) => {
-  core.startGroup(`Installing ${dependency}`);
-  const installResult = (__nccwpck_require__(81).spawnSync)('npm', ['install', dependency], { stdio: 'inherit' });
-  core.endGroup();
-  return installResult;
-};
+// Install jira-client
+core.startGroup('Installing jira-client');
+const installJiraClient = (__nccwpck_require__(81).spawnSync)('npm', ['install', 'jira-client'], { stdio: 'inherit' });
+core.endGroup();
 
-const installDependencies = (dependencies) => {
-  dependencies.forEach(dependency => installDependency(dependency));
-};
+// Install axios
+core.startGroup('Installing axios');
+const installAxios = (__nccwpck_require__(81).spawnSync)('npm', ['install', 'axios'], { stdio: 'inherit' });
+core.endGroup();
 
-try {
-  // List of dependencies to install
-  const dependenciesToInstall = ['axios', 'path', '@actions/core'];
+// Install @actions/core
+core.startGroup('Installing @actions/core');
+const installActionsCore = (__nccwpck_require__(81).spawnSync)('npm', ['install', '@actions/core'], { stdio: 'inherit' });
+core.endGroup();
 
-  // Install dependencies
-  installDependencies(dependenciesToInstall);
-
-  // Rest of your workflow script...
-  // ...
-
-} catch (error) {
-  core.setFailed(error.message);
-  process.exit(5);
-}
+// Install path
+core.startGroup('Installing path module');
+const pathInstall = (__nccwpck_require__(81).spawnSync)('npm', ['install', 'path'], { stdio: 'inherit' });
+core.endGroup();
 
 const token = core.getInput('jira-token');
 const baseURL = `https://${core.getInput('jira-host')}`;
