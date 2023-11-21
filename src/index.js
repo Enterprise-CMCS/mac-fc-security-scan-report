@@ -3,25 +3,17 @@ const axios = require('axios').default;
 const core = require('@actions/core');
 const path = require('path');
 
-// Install jira-client
-core.startGroup('Installing jira-client');
-const installJiraClient = require('child_process').spawnSync('npm', ['install', 'jira-client'], { stdio: 'inherit' });
-core.endGroup();
+// Install dependencies 
+const installDependency = (dependency) => {
+  core.startGroup(`Installing ${dependency}`);
+  const installResult = require('child_process').spawnSync('npm', ['install', dependency], { stdio: 'inherit' });
+  core.endGroup();
+  return installResult;
+};
 
-// Install axios
-core.startGroup('Installing axios');
-const installAxios = require('child_process').spawnSync('npm', ['install', 'axios'], { stdio: 'inherit' });
-core.endGroup();
-
-// Install @actions/core
-core.startGroup('Installing @actions/core');
-const installActionsCore = require('child_process').spawnSync('npm', ['install', '@actions/core'], { stdio: 'inherit' });
-core.endGroup();
-
-// Install path
-core.startGroup('Installing path module');
-const pathInstall = require('child_process').spawnSync('npm', ['install', 'path'], { stdio: 'inherit' });
-core.endGroup();
+const installDependencies = (dependencies) => {
+  dependencies.forEach(dependency => installDependency(dependency));
+};
 
 const token = core.getInput('jira-token');
 const baseURL = `https://${core.getInput('jira-host')}`;
@@ -236,7 +228,6 @@ try {
         const searchResponse = await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
         
         console.log('Jira Search Response:', searchResponse.status, searchResponse.data);
-
 
         const searchResult = searchResponse.data; 
         if (searchResponse.status === 200) {
