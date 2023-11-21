@@ -2865,6 +2865,21 @@ const installDependencies = (dependencies) => {
   dependencies.forEach(dependency => installDependency(dependency));
 };
 
+try {
+  // List of dependencies to install
+  const dependenciesToInstall = ['axios', 'path', '@actions/core'];
+
+  // Install dependencies
+  installDependencies(dependenciesToInstall);
+
+  // Rest of your workflow script...
+  // ...
+
+} catch (error) {
+  core.setFailed(error.message);
+  process.exit(5);
+}
+
 const token = core.getInput('jira-token');
 const baseURL = `https://${core.getInput('jira-host')}`;
 const headers = {
