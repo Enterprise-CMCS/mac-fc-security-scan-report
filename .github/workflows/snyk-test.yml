@@ -25,15 +25,15 @@ jobs:
       - name: use the custom github  action to parse Snyk output
         uses: ./
         with:
-          jira-username: ${{ secrets.WORKSPACE_EMAIL }}
-          jira-token: ${{ secrets.API_TOKEN }}
-          jira-host: arayateklu.atlassian.net
-          jira-project-key: MAC
-          jira-issue-type: Task
-          # jira-custom-field-key-value: ''
-          jira-labels: test,Snyk
-          jira-title-prefix: '[MACFC] - Snyk : '
-          is_jira_enterprise: false
-          assign-jira-ticket-to: ${{ secrets.ACCOUNT_ID_AT }}
+          jira-username: ${{ secrets.JIRA_USERNAME }}
+          jira-token: ${{ secrets.JIRA_TOKEN_AT }}
+          jira-host: ${{ secrets.JIRA_HOST_NAME }}
+          jira-project-key: 'EREGCSC'
+          jira-issue-type: Bug
+          jira-labels: 'eRegs,snyk'
+          jira-title-prefix: '[EREGCSC] - Snyk'
+          is_jira_enterprise: true
+          jira-custom-field-key-value: '{ "customfield_10100": "EREGCSC-1989" }'
           scan-output-path: 'snyk_output.txt'
           scan-type: 'snyk' 
+  
