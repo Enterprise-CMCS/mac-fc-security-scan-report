@@ -252,9 +252,9 @@ try {
                 "issuetype": {
                   "name": `${core.getInput('jira-issue-type')}`
                 },
-              //   "assignee": assignee,
+                "assignee": assignee,
                 "labels": [ core.getInput('jira-labels').split(',') ],
-              //   ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
+                ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
               }
             };
     
