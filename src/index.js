@@ -19,6 +19,7 @@ const token = core.getInput('jira-token');
 const baseURL = `https://${core.getInput('jira-host')}`;
 const headers = {
   'Content-Type': 'application/json',
+  'X-Atlassian-Token': 'no-check',
 };
 
 let jira;
