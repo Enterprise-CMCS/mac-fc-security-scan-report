@@ -9763,7 +9763,8 @@ try {
                 ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
               },
             };
-    
+            
+            console.log(`***ISSUE***: ${issue.fields}`)
             const createIssueUrl = `/rest/api/2/issue`;
             const issueResponse = await jira.post(createIssueUrl, issue);
     
