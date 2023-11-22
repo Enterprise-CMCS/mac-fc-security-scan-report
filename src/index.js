@@ -67,6 +67,7 @@ async function doesUserExist(username) {
 
     if (response.status === 200) {
       // User exists (status code 200 OK)
+      console.log('^^^^User found^^^^^^:', response.data);
       return true;
     } else if (response.status === 404) {
       // User does not exist (status code 404 Not Found)
@@ -233,27 +234,29 @@ try {
           if (!searchResult.issues || searchResult.issues.length === 0) {
             
             const username = core.getInput('assign-jira-ticket-to');
-            const assignee_exist = await doesUserExist(username).catch(() => null);
-            const assignee_key = `${core.getInput('is_jira_enterprise') === 'true' ? "name" : "accountId"}`;
-            const assignee = { [assignee_key]: `${assignee_exist ? username : null}`}
+            const username_exist = await doesUserExist(username).catch(() => null);
+            // const assignee_key = `${core.getInput('is_jira_enterprise') === 'true' ? "name" : "accountId"}`;
+            // const assignee = { [assignee_key]: `${assignee_exist ? username : null}`}
 
             const customFieldKeyValue = core.getInput('jira-custom-field-key-value') ? JSON.parse(core.getInput('jira-custom-field-key-value')) : null;
             const customJiraFields = customFieldKeyValue ? { ...customFieldKeyValue } : null;
   
             const issue = {
-              "fields": {
-                "project": {
-                  "key": `${core.getInput('jira-project-key')}`
+              fields: {
+                project: {
+                  key: core.getInput('jira-project-key'),
                 },
-                "summary": `${core.getInput('jira-title-prefix')}  ${vulnerability.title}`,
-                "description": `${vulnerability.description}`,
-                "issuetype": {
-                  "name": `${core.getInput('jira-issue-type')}`
+                summary: `${core.getInput('jira-title-prefix')}  ${vulnerability.title}`,
+                description: vulnerability.description,
+                issuetype: {
+                  name: core.getInput('jira-issue-type'),
                 },
-                // "assignee": assignee,
-                // "labels": [ core.getInput('jira-labels').split(',') ],
-                // ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
-              }
+                assignee: {
+                  name: username_exist ? username : null,
+                },
+                labels: core.getInput('jira-labels').split(','),
+                ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
+              },
             };
     
             const createIssueUrl = `/rest/api/2/issue`;
