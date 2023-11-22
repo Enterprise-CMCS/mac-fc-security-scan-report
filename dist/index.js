@@ -9524,6 +9524,7 @@ const token = core.getInput('jira-token');
 const baseURL = `https://${core.getInput('jira-host')}`;
 const headers = {
   'Content-Type': 'application/json',
+  'X-Atlassian-Token': 'no-check',
 };
 
 let jira;
@@ -9756,9 +9757,9 @@ try {
                 "issuetype": {
                   "name": `${core.getInput('jira-issue-type')}`
                 },
-                "assignee": assignee,
-                "labels": core.getInput('jira-labels').split(','),
-                ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
+              //   "assignee": assignee,
+                "labels": [ core.getInput('jira-labels').split(',') ],
+              //   ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
               }
             };
     
@@ -9800,6 +9801,9 @@ try {
 
       for (const vulnerability of uniqueVulnerabilities) {
         try {
+          console.log(vulnerability);
+          console.log('******** Jira ticket payload: *********');
+          console.log(issue);
           console.log(`Creating Jira ticket for vulnerability: ${vulnerability.title}`);
           const resp = await createSnykJiraTicket(vulnerability);
           console.log(resp)
