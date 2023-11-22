@@ -296,9 +296,6 @@ try {
 
       for (const vulnerability of uniqueVulnerabilities) {
         try {
-          console.log(vulnerability);
-          console.log('******** Jira ticket payload: *********');
-          console.log(issue);
           console.log(`Creating Jira ticket for vulnerability: ${vulnerability.title}`);
           const resp = await createSnykJiraTicket(vulnerability);
           console.log(resp)
