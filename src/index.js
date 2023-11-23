@@ -255,10 +255,6 @@ try {
               }
             };
             
-            // Log the request payload
-            console.log('Jira API Request Payload:', issue);
-
-
             const createIssueUrl = `/rest/api/2/issue`;
             const issueResponse = await jira.post(createIssueUrl, issue);
     
