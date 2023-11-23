@@ -223,7 +223,7 @@ try {
     async function createSnykJiraTicket(vulnerability) {
       try {
  
-        const title = vulnerability.title.replaceAll("\"", "\\\"");
+        // const title = vulnerability.title.replaceAll("\"", "\\\"");
         const jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${vulnerability.title}" AND created >= startOfDay("-60d") AND status != "Canceled"`;
         const searchResponse = await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
         
