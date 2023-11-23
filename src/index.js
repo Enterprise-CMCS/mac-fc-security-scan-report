@@ -19,7 +19,6 @@ const token = core.getInput('jira-token');
 const baseURL = `https://${core.getInput('jira-host')}`;
 const headers = {
   'Content-Type': 'application/json',
-  'X-Atlassian-Token': 'no-check',
 };
 
 let jira;
@@ -67,7 +66,6 @@ async function doesUserExist(username) {
 
     if (response.status === 200) {
       // User exists (status code 200 OK)
-      console.log('^^^^User found^^^^^^:', response.data);
       return true;
     } else if (response.status === 404) {
       // User does not exist (status code 404 Not Found)
@@ -144,7 +142,7 @@ try {
                 "issuetype": {
                   "name": `${core.getInput('jira-issue-type')}`
                 },
-                "assignee": assignee,
+                // "assignee": assignee,
                 "labels": core.getInput('jira-labels').split(','),
                 ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
               }
@@ -228,38 +226,35 @@ try {
         const title = vulnerability.title.replaceAll("\"", "\\\"");
         const jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${vulnerability.title}" AND created >= startOfDay("-60d") AND status != "Canceled"`;
         const searchResponse = await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
-
+        
         const searchResult = searchResponse.data; 
         if (searchResponse.status === 200) {
           if (!searchResult.issues || searchResult.issues.length === 0) {
             
             const username = core.getInput('assign-jira-ticket-to');
-            const username_exist = await doesUserExist(username).catch(() => null);
-            // const assignee_key = `${core.getInput('is_jira_enterprise') === 'true' ? "name" : "accountId"}`;
-            // const assignee = { [assignee_key]: `${assignee_exist ? username : null}`}
+            const assignee_exist = await doesUserExist(username).catch(() => null);
+            const assignee_key = `${core.getInput('is_jira_enterprise') === 'true' ? "name" : "accountId"}`;
+            const assignee = { [assignee_key]: `${assignee_exist ? username : null}`}
 
             const customFieldKeyValue = core.getInput('jira-custom-field-key-value') ? JSON.parse(core.getInput('jira-custom-field-key-value')) : null;
             const customJiraFields = customFieldKeyValue ? { ...customFieldKeyValue } : null;
   
             const issue = {
-              fields: {
-                project: {
-                  key: core.getInput('jira-project-key'),
+              "fields": {
+                "project": {
+                  "key": `${core.getInput('jira-project-key')}`
                 },
-                summary: `${core.getInput('jira-title-prefix')}  ${vulnerability.title}`,
-                description: vulnerability.description,
-                issuetype: {
-                  name: core.getInput('jira-issue-type'),
+                "summary": `${core.getInput('jira-title-prefix')}  ${vulnerability.title}`,
+                "description": `${vulnerability.description}`,
+                "issuetype": {
+                  "name": `${core.getInput('jira-issue-type')}`
                 },
-                assignee: {
-                  name: username_exist ? username : null,
-                },
-                labels: core.getInput('jira-labels').split(','),
+                "assignee": assignee,
+                "labels": core.getInput('jira-labels').split(','),
                 ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
-              },
+              }
             };
-            
-            console.log(`***ISSUE***: ${issue.fields}`)
+    
             const createIssueUrl = `/rest/api/2/issue`;
             const issueResponse = await jira.post(createIssueUrl, issue);
     
@@ -298,7 +293,6 @@ try {
 
       for (const vulnerability of uniqueVulnerabilities) {
         try {
-          console.log('********Jira ticket payload:*********');
           console.log(`Creating Jira ticket for vulnerability: ${vulnerability.title}`);
           const resp = await createSnykJiraTicket(vulnerability);
           console.log(resp)

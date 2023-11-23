@@ -36,4 +36,5 @@ jobs:
           jira-custom-field-key-value: '{ "customfield_10100": "EREGCSC-1989" }'
           scan-output-path: 'snyk_output.txt'
           scan-type: 'snyk' 
+          # assign-jira-ticket-to:
   
