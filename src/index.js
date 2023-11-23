@@ -234,7 +234,7 @@ try {
             const username = core.getInput('assign-jira-ticket-to');
             const assignee_exist = await doesUserExist(username).catch(() => null);
             const assignee_key = `${core.getInput('is_jira_enterprise') === 'true' ? "name" : "accountId"}`;
-            const assignee = { [assignee_key]: `${assignee_exist ? username : null}`}
+            const assignee = assignee_exist ? { [assignee_key]: username } : null;
 
             const customFieldKeyValue = core.getInput('jira-custom-field-key-value') ? JSON.parse(core.getInput('jira-custom-field-key-value')) : null;
             const customJiraFields = customFieldKeyValue ? { ...customFieldKeyValue } : null;
@@ -249,12 +249,12 @@ try {
                 "issuetype": {
                   "name": `${core.getInput('jira-issue-type')}`
                 },
-                "assignee": assignee,
+                ...(assignee && { "assignee": assignee }),
                 "labels": core.getInput('jira-labels').split(','),
                 ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
               }
             };
-            
+
             const createIssueUrl = `/rest/api/2/issue`;
             const issueResponse = await jira.post(createIssueUrl, issue);
     
