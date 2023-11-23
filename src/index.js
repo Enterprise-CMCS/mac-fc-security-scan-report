@@ -237,13 +237,16 @@ try {
             const username = core.getInput('assign-jira-ticket-to');
             const isJiraEnterprise = core.getInput('is_jira_enterprise');
 
+            console.log('***isJiraEnterprise:', isJiraEnterprise);
+            console.log('***Username to check:', username);
+
             const assignee_exist = username ? await doesUserExist(username, isJiraEnterprise).catch((error) => {
               console.error('Error checking user existence:', error);
               return null;
             }) : null;
             const assignee_key = `${isJiraEnterprise === 'true' ? "name" : "accountId"}`;
             const assignee = assignee_exist ? { [assignee_key]: username } : null;
-
+            
             const customFieldKeyValue = core.getInput('jira-custom-field-key-value') ? JSON.parse(core.getInput('jira-custom-field-key-value')) : null;
             const customJiraFields = customFieldKeyValue ? { ...customFieldKeyValue } : null;
   
