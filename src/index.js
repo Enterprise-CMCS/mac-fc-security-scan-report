@@ -51,11 +51,10 @@ if (isJiraEnterprise === 'true') {
 
 
 // Function to check if the user exists using the Jira REST API
-async function doesUserExist(username) {
+async function doesUserExist(username, isJiraEnterprise) {
   try { 
     let response;
-    const isJiraEnterprise = core.getInput('is_jira_enterprise');
-    
+
     if (isJiraEnterprise === 'true') {
       response = await jira.get(`/rest/api/2/user?username=${username}`);
     } else if (isJiraEnterprise === 'false') {
@@ -233,7 +232,9 @@ try {
           if (!searchResult.issues || searchResult.issues.length === 0) {
             
             const username = core.getInput('assign-jira-ticket-to');
-            const assignee_exist = username ? await doesUserExist(username).catch(() => null) : null;
+            const isJiraEnterprise = core.getInput('is_jira_enterprise');
+
+            const assignee_exist = username ? await doesUserExist(username, isJiraEnterprise).catch(() => null) : null;
             const assignee_key = `${core.getInput('is_jira_enterprise') === 'true' ? "name" : "accountId"}`;
             const assignee = assignee_exist ? { [assignee_key]: username } : null;
 
