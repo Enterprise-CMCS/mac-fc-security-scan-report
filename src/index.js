@@ -237,10 +237,7 @@ try {
         if (searchResponse.status === 200) {
           if (!searchResult.issues || searchResult.issues.length === 0) {
             
-            const assignee_exist = username ? await doesUserExist(username, isJiraEnterprise).catch((error) => {
-              console.error('Error checking user existence:', error);
-              return null;
-            }) : null;
+            const assignee_exist = username ? await doesUserExist(username, isJiraEnterprise).catch(() => false) : false;
             const assignee_key = `${isJiraEnterprise === 'true' ? "name" : "accountId"}`;
             const assignee = assignee_exist ? { [assignee_key]: username } : null;
             
