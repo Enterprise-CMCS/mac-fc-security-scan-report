@@ -142,7 +142,7 @@ try {
                 "issuetype": {
                   "name": `${core.getInput('jira-issue-type')}`
                 },
-                // "assignee": assignee,
+                "assignee": assignee,
                 "labels": core.getInput('jira-labels').split(','),
                 ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
               }
@@ -223,7 +223,7 @@ try {
     async function createSnykJiraTicket(vulnerability) {
       try {
  
-        // const title = vulnerability.title.replaceAll("\"", "\\\"");
+        const title = vulnerability.title.replaceAll("\"", "\\\"");
         const jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${vulnerability.title}" AND created >= startOfDay("-60d") AND status != "Canceled"`;
         const searchResponse = await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
         
@@ -254,7 +254,11 @@ try {
                 ...(customJiraFields && Object.keys(customJiraFields).length > 0 && { ...customJiraFields }),
               }
             };
-    
+            
+            // Log the request payload
+            console.log('Jira API Request Payload:', issue);
+
+
             const createIssueUrl = `/rest/api/2/issue`;
             const issueResponse = await jira.post(createIssueUrl, issue);
     
