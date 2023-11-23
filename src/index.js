@@ -232,6 +232,8 @@ try {
           if (!searchResult.issues || searchResult.issues.length === 0) {
             
             const username = core.getInput('assign-jira-ticket-to');
+            console.log('isJiraEnterprise:', isJiraEnterprise);
+            console.log('Username to check:', username);
             const assignee_exist = username ? await doesUserExist(username).catch(() => null) : null;
             const assignee_key = `${core.getInput('is_jira_enterprise') === 'true' ? "name" : "accountId"}`;
             const assignee = assignee_exist ? { [assignee_key]: username } : null;
