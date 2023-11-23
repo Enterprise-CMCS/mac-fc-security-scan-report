@@ -67,13 +67,15 @@ async function doesUserExist(username, isJiraEnterprise) {
     if (response.status === 200) {
       // User exists (status code 200 OK)
       return true;
-    } else if (response.status === 404) {
+    // } else if (response.status === 404) {
+    } else {
       // User does not exist (status code 404 Not Found)
       return false;
-    } else {
-      // Handle other response statuses if needed
-      throw new Error(`Unexpected response status: ${response.status} ${response.statusText}`);
     }
+    // } else {
+    //   // Handle other response statuses if needed
+    //   throw new Error(`Unexpected response status: ${response.status} ${response.statusText}`);
+    // }
   } catch (err) {
     console.error(err);
     return false; // Return false if there was an error during the HTTP request
