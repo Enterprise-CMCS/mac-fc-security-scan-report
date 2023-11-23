@@ -222,6 +222,11 @@ try {
 
     async function createSnykJiraTicket(vulnerability) {
       try {
+        const username = core.getInput('assign-jira-ticket-to');
+        const isJiraEnterprise = core.getInput('is_jira_enterprise');
+
+        console.log('isJiraEnterprise:', isJiraEnterprise);
+        console.log('Username to check:', username);
  
         // const title = vulnerability.title.replaceAll("\"", "\\\"");
         const jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${vulnerability.title}" AND created >= startOfDay("-60d") AND status != "Canceled"`;
@@ -234,12 +239,6 @@ try {
         if (searchResponse.status === 200) {
           if (!searchResult.issues || searchResult.issues.length === 0) {
             
-            const username = core.getInput('assign-jira-ticket-to');
-            const isJiraEnterprise = core.getInput('is_jira_enterprise');
-
-            console.log('***isJiraEnterprise:', isJiraEnterprise);
-            console.log('***Username to check:', username);
-
             const assignee_exist = username ? await doesUserExist(username, isJiraEnterprise).catch((error) => {
               console.error('Error checking user existence:', error);
               return null;
