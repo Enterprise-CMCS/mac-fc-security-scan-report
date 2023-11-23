@@ -224,7 +224,7 @@ try {
       try {
         const username = core.getInput('assign-jira-ticket-to');
         const isJiraEnterprise = core.getInput('is_jira_enterprise');
-
+      
         console.log('isJiraEnterprise:', isJiraEnterprise);
         console.log('Username to check:', username);
  
@@ -233,8 +233,6 @@ try {
         const searchResponse = await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
         
         const searchResult = searchResponse.data;
-        console.log('isJiraEnterprise:', isJiraEnterprise);
-        console.log('Username to check:', username);
 
         if (searchResponse.status === 200) {
           if (!searchResult.issues || searchResult.issues.length === 0) {
