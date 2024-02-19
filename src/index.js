@@ -121,6 +121,9 @@ try {
         const searchResponse = await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
         
         const searchResult = searchResponse.data;
+
+        console.log("search result: ", searchResult);
+
         if (searchResponse.status === 200) {
           if (!searchResult.issues || searchResult.issues.length === 0) {
             
