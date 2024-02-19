@@ -1,6 +1,5 @@
 const fs = require('fs');
-// const axios = require('axios').default;
-const axios = require('axios');  
+const axios = require('axios').default;
 const core = require('@actions/core');
 const path = require('path');
 
@@ -172,6 +171,7 @@ try {
         }
       } catch (error) {
         console.error(`Error while creating Jira ticket for vulnerability ${vulnerability.name}:`, error);
+        console.error("search result: ", searchResult);
         process.exit(3);
       }
     }
@@ -230,6 +230,7 @@ try {
         const title = vulnerability.title.replaceAll("\"", "\\\"");
         const jqlQuery = `project = "${core.getInput('jira-project-key')}" AND summary ~ "${vulnerability.title}" AND created >= startOfDay("-60d") AND status != "Canceled"`;
         const searchResponse = await jira.get('/rest/api/2/search', { params: { jql: jqlQuery } });
+        console.log("search response: ", searchResponse);
         
         const searchResult = searchResponse.data; 
         if (searchResponse.status === 200) {
@@ -278,7 +279,7 @@ try {
           process.exit(3);
         }
       } catch (error) {
-        console.error(`Error while creating Jira ticket for vulnerability ${vulnerability.title}:`, error);
+        console.error(`Error! while creating Jira ticket for vulnerability ${vulnerability.title}:`, error);
         process.exit(3);
       }
     }
@@ -301,7 +302,9 @@ try {
           const resp = await createSnykJiraTicket(vulnerability);
           console.log(resp)
         } catch (error) {
-          console.error(`Error while creating Jira ticket for vulnerability ${vulnerability.title}:`, error);
+          console.log("errors array: ", resp.data.errorMessages);
+          console.error(`Error! while creating Jira ticket for vulnerability ${vulnerability.title}:`, error);
+
           process.exit(3);
         }
       }
