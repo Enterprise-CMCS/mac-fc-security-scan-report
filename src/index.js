@@ -1,5 +1,6 @@
 const fs = require('fs');
-const axios = require('axios').default; 
+// const axios = require('axios').default;
+const axios = require('axios');  
 const core = require('@actions/core');
 const path = require('path');
 
