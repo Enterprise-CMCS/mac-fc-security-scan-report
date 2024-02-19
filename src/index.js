@@ -170,8 +170,7 @@ try {
           process.exit(3);
         }
       } catch (error) {
-        console.error(`Error while creating Jira ticket for vulnerability ${vulnerability.name}:`, error);
-        console.error("search result: ", searchResult);
+        console.error(`debug 2: Error while creating Jira ticket for vulnerability ${vulnerability.name}:`, error);
         process.exit(3);
       }
     }
@@ -194,7 +193,7 @@ try {
           const resp = await createZapJiraTicket(vulnerability);
           console.log(resp);
         } catch (error) {
-          console.error(`Error while creating Jira ticket for vulnerability ${vulnerability.name}:`, error);
+          console.error(`debug 3: Error while creating Jira ticket for vulnerability ${vulnerability.name}:`, error);
           process.exit(3);
         }
       }
@@ -279,7 +278,11 @@ try {
           process.exit(3);
         }
       } catch (error) {
-        console.error(`Error! while creating Jira ticket for vulnerability ${vulnerability.title}:`, error);
+        console.log("ERRORRR: ", error);
+        console.error(`debug 1: Error while creating Jira ticket for vulnerability ${vulnerability.title}:`, error);
+        if (error.response && error.response.data && error.response.data.errorMessages) {
+          console.error(`Error messages: ${error.response.data.errorMessages}`);
+      }
         process.exit(3);
       }
     }
@@ -302,9 +305,7 @@ try {
           const resp = await createSnykJiraTicket(vulnerability);
           console.log(resp)
         } catch (error) {
-          console.log("errors array: ", resp.data.errorMessages);
-          console.error(`Error! while creating Jira ticket for vulnerability ${vulnerability.title}:`, error);
-
+          console.error(`Error!! while creating Jira ticket for vulnerability ${vulnerability.title}:`, error);
           process.exit(3);
         }
       }
