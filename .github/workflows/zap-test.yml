@@ -24,15 +24,15 @@ jobs:
       - name: Run Jira Ticket Creator
         uses: ./
         with:
-          jira-username: ${{ secrets.JIRA_ENT_USERNAME }}
-          jira-token: ${{ secrets.JIRA_ENT_USER_TOKEN }}
-          jira-host: jiraent.cms.gov
+          jira-username: ${{ secrets.WORKSPACE_EMAIL }}
+          jira-token: ${{ secrets.API_TOKEN }}
+          jira-host: arayateklu.atlassian.net
           jira-project-key: MAC
           jira-issue-type: Epic
           jira-labels: test,zap
           jira-title-prefix: '[MACFC] - Zap : '
           # jira-custom-field-key-value: ''
-          # assign-jira-ticket-to: ${{ secrets.ACCOUNT_ID_AT }}
+          assign-jira-ticket-to: ${{ secrets.ACCOUNT_ID_AT }}
           is_jira_enterprise: false
           zap-risk-code: '3'
           scan-output-path: 'report_json.json'
