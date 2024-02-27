@@ -198,26 +198,66 @@ try {
   } else if (scanType === 'snyk') {
     function parseSnykOutput(inputData) {
       let vulnerabilities = [];
-      if (inputData) {
-        try {
-          const data = JSON.parse(inputData);
-          if (Array.isArray(data)) {
-            for (const project of data) {
-              if (project && project.vulnerabilities && Array.isArray(project.vulnerabilities)) {
-                vulnerabilities = vulnerabilities.concat(project.vulnerabilities);
+      if (core.getInput('snyk-test-type') === 'open-source' || core.getInput('snyk-test-type') === 'container') {
+        if (inputData) {
+          try {
+            const data = JSON.parse(inputData);
+            if (Array.isArray(data)) {
+              for (const project of data) {
+                if (project && project.vulnerabilities && Array.isArray(project.vulnerabilities)) {
+                  vulnerabilities = vulnerabilities.concat(project.vulnerabilities);
+                }
               }
+            } else {
+              console.error('No Vulnerabilities Detetcted or Invalid JSON data format.');
+              // vulnerabilities = parseNonJsonData(inputData);
             }
-          } else {
-            console.error('No Vulnerabilities Detetcted or Invalid JSON data format.');
+          } catch (error) {
+            console.error('Error parsing Snyk output:', error);
+            process.exit(2);
             // vulnerabilities = parseNonJsonData(inputData);
           }
-        } catch (error) {
-          console.error('Error parsing Snyk output:', error);
-          process.exit(2);
-          // vulnerabilities = parseNonJsonData(inputData);
         }
+        return vulnerabilities;
       }
-      return vulnerabilities;
+      else if (core.getInput('snyk-test-type') === 'iac') {
+        if (inputData) {
+          try {
+            const data = JSON.parse(inputData);
+            if (data && Array.isArray(data)) {
+              data.forEach(d => {
+                if (Array.isArray(d.infrastructureAsCodeIssues) && d.infrastructureAsCodeIssues.length > 0) {
+                  d.infrastructureAsCodeIssues.forEach(issue => {
+                    // TODO: check for min severity
+                    if (issue.severity !== "low") {
+                      const iacIssue = { ...issue };
+                      iacIssue.filePath = d.targetFilePath;
+                      vulnerabilities.push(iacIssue);
+                    }
+                  });
+                }
+              });
+            }
+          } catch (error) {
+            console.error('Error parsing Snyk output:', error);
+            process.exit(2);
+          }
+        }
+        return vulnerabilities;
+      }
+
+    }
+
+    function iacDescriptionStr(vulnerability) {
+      let descriptionStr = "";
+      descriptionStr += vulnerability.iacDescription.issue    ? `*Issue:*\n ${vulnerability.iacDescription.issue} \n\n ` : '';
+      descriptionStr += vulnerability.iacDescription.impact   ? `*Impact:*\n ${vulnerability.iacDescription.impact} \n\n ` : '';
+      descriptionStr += vulnerability.iacDescription.resolve  ? `*Resolve:*\n ${vulnerability.iacDescription.resolve} \n\n` : '';
+      descriptionStr += vulnerability.filePath                ? `*File:* ${vulnerability.filePath} \n\n ` : '';
+      descriptionStr += vulnerability.lineNumber              ? `*Line Number:* ${vulnerability.lineNumber} \n\n` : '';
+      descriptionStr += vulnerability.documentation           ? `*Documentation:* ${vulnerability.documentation}` : '';
+      
+      return descriptionStr;
     }
 
     async function createSnykJiraTicket(vulnerability) {
@@ -245,7 +285,7 @@ try {
                   "key": `${core.getInput('jira-project-key')}`
                 },
                 "summary": `${core.getInput('jira-title-prefix')}  ${vulnerability.title}`,
-                "description": `${vulnerability.description}`,
+                "description": `${ core.getInput('snyk-test-type') === 'iac' ? iacDescriptionStr(vulnerability) : vulnerability.description}`,
                 "issuetype": {
                   "name": `${core.getInput('jira-issue-type')}`
                 },

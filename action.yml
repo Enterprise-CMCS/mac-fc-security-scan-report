@@ -42,6 +42,10 @@ inputs:
     description: 'can type to perform "snyk" or "zap"'
     required: false
     default: 'snyk'
+  snyk-test-type:
+    description: 'type of snyk test being performed; can be "open-source", "iac", "container", or "code"'
+    required: false
+    default: 'open-source'
 runs:
   using: node16
   main: dist/index.js
