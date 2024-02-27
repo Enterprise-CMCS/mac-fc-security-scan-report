@@ -62,7 +62,7 @@ Snyk can be run within a Github Actions workflow in conjunction with this action
 
 First the `snyk` CLI will need to be installed with `npm`. It is then used to run a scan using the `snyk test` command. The results are written to the `snyk_output.txt` file, which is then provided as input to this action in the next step, and is used to create Jira tickets from the Snyk findings.
 
-Generally, teams will run Snyk scans with both a Pull Request trigger, and a Cron Job trigger. For example:
+Generally, teams will run Snyk scans with both a Pull Request trigger and a Cron Job trigger. For example:
 ```
 on:
     pull_request:
@@ -70,54 +70,34 @@ on:
     schedule:
         - cron:  '0 6 * * *' # daily at 0600 UTC
 ```
-    
 
 
-
-<!-- ## Pull Request or Cron Job
-
-At the top, the document checks to see if a pull request was done on the main branch or if it’s the set time for the cron job. The branch can be changed to whichever branch needs testing however, the deployment will also have to be done to that branch. Also, pull_request can be changed to other triggers like push or schedule. The use for schedule is shown below. The cron job will run at midnight EST meaning that if you put ‘04***’, that is 4am in a different time zone but midnight here. If you want to modify the start time, this is what each position inside the quotes, '* * * * *', means. 'Minute Hour Date Month DayInWeek'. So its the minute in the hour, then the hour, then the date (1-30/31), then the month (1-12), then the day of the week (0-6).  -->
-
-
-
-<!-- ## Pull Request Run
-
-The next section is the snyk run on pull request. There is not much to change here but it could be set to run on pull request, push, and commit. Here you can see the snyk token is used. This is the token that allows github to call upon snyk to run the scan publish the results.
-
-```
-snyk_run:
-    name: Snyk Run (for PR)
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v3
-    
-    # The following step is required only if your project uses npm 
-    # The `working-directory` input will need to be set to the
-    # directory that stores your package.json file
-    - name: Run npm install
-        working-directory: path/to/package.json/directory
-        run: |
-        npm install
-      
-      - name: Install Snyk and Run Snyk test
-        run: |
-          npm install -g snyk
-          snyk test --all-projects --json > snyk_output.txt || true
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-``` -->
-
-
-This activates the action at a regular interval at the time specified. A full workflow with a cron job trigger could be written as follows: 
+This activates the Snyk scan whenever a Pull Request is opened as well as at a regular interval at the time specified. A full workflow with both of these triggers could be written as follows: 
 
 
 ```
 on:
-  schedule:
-    - cron: '0 6 * * *' # daily at 0600 UTC
+    pull_request:
+        branches: [ main ]
+    schedule:
+        - cron:  '0 6 * * *' # daily at 0600 UTC
+
+jobs:
+  snyk_run:
+    name: Snyk Run (for PR)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Install Snyk and Run Snyk test
+        run: |
+          npm install -g snyk
+          snyk test --all-projects --json > snyk_output.txt || true
+          cat snyk_output.txt
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
 snyk_nightly_run:  
       name: Snyk Nightly Run (for nightly cron with JIRA)
@@ -131,6 +111,7 @@ snyk_nightly_run:
           run: |
             npm install -g snyk
             snyk test --all-projects --json > snyk_output.txt || true
+            cat snyk_output.txt
           env:
             SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
           
@@ -149,16 +130,8 @@ snyk_nightly_run:
               scan-type: 'snyk'
 ```
 
-**Please note**: You may receive this output from the final step: `No Vulnerabilities Detetcted or Invalid JSON data format.` 
-This may indicate an error during the Snyk scan. In this case, it may be best to re-run the action, but with a temporary step added to output the contents of `snyk_output.txt`. This can be done with following:
-```
-        - name: Install Snyk and Run Snyk test
-          run: |
-            npm install -g snyk
-            snyk test --all-projects --json > snyk_output.txt || true
-            cat snyk_output.txt # Add a this step to print contents of file
-          env:
-            SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-```
-If an error occured during the Snyk scan, it will have been printed in `snyk_output.txt`, and by using `cat` to output the file contents, you can identify the error and proceed accordingly.
+Note that the `snyk_run` job that runs for each PR does not create any Jira tickets from the scan results. This scan is performed to simply provide teams additional visibility to the current vulnerabilities in their project. By running `cat snyk_output.txt`, the current vulnerabilities will be output in the Run Details for the workflow.
+
+**Also note**: You may receive this output during the step to create Jira tickets in the `snyk_nightly_run` job: `No Vulnerabilities Detetcted or Invalid JSON data format.` 
+This may indicate an error during the Snyk scan. In this case, the contents of `snyk_output.txt` should vbe examined. If an error occured during the Snyk scan, it will have been written to `snyk_output.txt`. By viewing the file contents, you can identify the error and proceed accordingly.
 
