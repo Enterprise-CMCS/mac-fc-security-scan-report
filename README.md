@@ -3,22 +3,18 @@ This GitHub Action script is designed to create Jira tickets for vulnerabilities
 
 # Inputs
 The script expects the following inputs:
-<pre>
-jira-host:   The host URL of your Jira instance.
-jira-username:   The username used to authenticate with Jira.
-jira-token:   The token or password used to authenticate with Jira.
-<!-- TODO: remove scan-type, and set it's default value to snyk -->
-<!-- scan-type:   The type of scan to process. Supported values: "zap" or "snyk". -->
-<!-- 'zap-risk-code' is currently not being uses as no teams are using this tool with Zap -->
-<!-- zap-risk-code (only for Zap scan):   The minimum risk code for vulnerabilities to be considered. -->
-jira-project-key:   The Jira project key where the tickets will be created.
-jira-title-prefix:   The prefix to be added to the Jira ticket summary.
-jira-issue-type:   The Jira issue type for the created tickets.
-jira-labels:   Labels to be applied to the created Jira tickets (comma-separated).
-jira-custom-field-key-value:   A JSON string containing key-value pairs of custom fields and their values in Jira.
-assign-jira-ticket-to: The accountID of a user to assigne a ticket to.
-scan-output-path:   The path to the scan output file.
-</pre>
+```
+jira-host:                   The host URL of your Jira instance.
+jira-username:               The username used to authenticate with Jira.
+jira-token:                  The token or password used to authenticate with Jira.
+jira-project-key:            The Jira project key where the tickets will be created.
+jira-title-prefix:           The prefix to be added to the Jira ticket summary.
+jira-issue-type:             The Jira issue type for the created tickets.
+jira-labels:                 Labels to be applied to the created Jira tickets (comma-separated).
+jira-custom-field-key-value: A JSON string containing key-value pairs of custom fields and their values in Jira.
+assign-jira-ticket-to:       The accountID of a user to assigne a ticket to.
+scan-output-path:            The path to the scan output file.
+```
 # Usage
 
 To use this GitHub Action script, you can create a workflow file (e.g., .github/workflows/security-scan.yml) in your repository with the following content:
