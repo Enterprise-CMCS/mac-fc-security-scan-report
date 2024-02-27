@@ -40,7 +40,8 @@ inputs:
     required: true
   scan-type:
     description: 'can type to perform "snyk" or "zap"'
-    required: true 
+    required: false
+    default: 'snyk'
 runs:
   using: node16
   main: dist/index.js
