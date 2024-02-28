@@ -198,14 +198,22 @@ try {
   } else if (scanType === 'snyk') {
     function parseSnykOutput(inputData) {
       let vulnerabilities = [];
-      if (core.getInput('snyk-test-type') === 'open-source' || core.getInput('snyk-test-type') === 'container') {
+      if (core.getInput('snyk-test-type') === 'open-source') {
         if (inputData) {
           try {
             const data = JSON.parse(inputData);
             if (Array.isArray(data)) {
               for (const project of data) {
                 if (project && project.vulnerabilities && Array.isArray(project.vulnerabilities)) {
-                  vulnerabilities = vulnerabilities.concat(project.vulnerabilities);
+                  if (!core.getInput('snyk-test-type') === 'container') {
+                    vulnerabilities = vulnerabilities.concat(project.vulnerabilities);
+                  } else {
+                    project.vulnerabilities.forEach(v => {
+                      if (v.severity === 'critical') {
+                        vulnerabilities.push(v);
+                      }
+                    });
+                  }
                 }
               }
             } else {
@@ -219,6 +227,47 @@ try {
           }
         }
         return vulnerabilities;
+      }
+      else if (core.getInput('snyk-test-type') === 'container') {
+        if (inputData) {
+          try {
+            const data = JSON.parse(inputData);
+            if (data && data.vulnerabilities && Array.isArray(data.vulnerabilities)) {
+              data.vulnerabilities.forEach(v => {
+                if (v.severity === 'critical') {
+                  vulnerabilities.push(v);
+                }
+              });
+              // if more than one image is being scanned, all images after the first will have
+              // their vulnerabilities placed in an applications array (not sure why it's done this way)
+              if (data.applications && Array.isArray(data.applications)) {
+                data.applications.forEach(app => {
+                  if (app.vulnerabilities && Array.isArray(app.vulnerabilities)) {
+                    app.vulnerabilities.forEach(v => {
+                      if (v.severity === 'critical') {
+                        vulnerabilities.push(v);
+                      }
+                    })
+                  }
+                });
+              }
+            } 
+            if (vulnerabilities.length === 0) {
+                console.error('No Vulnerabilities Detetcted or Invalid JSON data format.');
+              // vulnerabilities = parseNonJsonData(inputData);
+            }
+            // } else {
+            //   console.error('No Vulnerabilities Detetcted or Invalid JSON data format.');
+            //   // vulnerabilities = parseNonJsonData(inputData);
+            // }
+          } catch (error) {
+            console.error('Error parsing Snyk output:', error);
+            process.exit(2);
+            // vulnerabilities = parseNonJsonData(inputData);
+          }
+        }
+        return vulnerabilities;
+
       }
       else if (core.getInput('snyk-test-type') === 'iac') {
         if (inputData) {
