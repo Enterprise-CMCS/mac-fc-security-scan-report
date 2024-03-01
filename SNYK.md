@@ -29,38 +29,184 @@ Once the jira service account is created, you will be provided the Username and 
 Go back to github and go to the secrets page and create secrets to store the Personal Access Token and Jira Host name. The PAT is the token just created in the last step, and the Host name is the first part of the jira url up to ".gov" without the "https://". For example, the homepage URL for eRegs Jira is "https://jiraent.cms.gov/projects/EREGCSC/summary". However, the host name is just "jiraent.cms.gov". Below is the variables and their descriptions:
 
 ```
-    JIRA_TOKEN: This secret needs to hold the PAT value of the Jira Service Account.
-    JIRA_HOST: The Jira Domain- EX. "jirarent.cms.gov".
+JIRA_TOKEN: This secret needs to hold the PAT value of the Jira Service Account.
+JIRA_HOST: The Jira Domain- EX. "jirarent.cms.gov".
 ```
 
 # Implementation
 
 <!-- The `snyk-test.yml` script is located in the .github/workflows directory. This script provides an example of how to run a Snyk scan, and then create Jira ticekts from the results, using this action. -->
-Snyk can be run within a Github Actions workflow in conjunction with this action by using the following steps:
+<!-- Snyk can be run within a Github Actions workflow in conjunction with this action by using the following steps: -->
+
+Snyk is run in a Github Action using the `snyk` CLI. The CLI provides four different scan commands:
+- `snyk test` - tests open source dependencies used in your project
+- `snyk container test` - tests container images in your project  
+- `snyk iac test` - tests any IaC in your project
+- `snyk code test` - runs static code analysis for your project
+
+You may reference the [Snyk Documentation](https://docs.snyk.io/snyk-cli) for more information on these CLI commmands.
+
+Currently, the `macfc-security-scan-report` action supports Jira Ticket creation for vulnerabilties detected using the `snyk test`, `snyk iac test`, and `snyk container test` commands. The next three sections will cover how to use each one in conjunction with this action.
+
+## Snyk Open-Source Testing
+`snyk test` is used to detect vulnerabilities in any open-source dependencies used in your project. The following two workflow steps demonstrate how to use `snyk test` alongside this action:
+
 ```
-    - name: Install Snyk and Run Snyk test
-      run: |
-        npm install -g snyk
-        snyk test --all-projects --json > snyk_output.txt || true
-      env:
-        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-    
-    - name: use macfc-security-scan-report action to parse Snyk output
-      uses: Enterprise-CMCS/macfc-security-scan-report@v2.7.4
-      with:
-        jira-token: ${{ secrets.JIRA_TOKEN }}
-        jira-host: ${{ secrets.JIRA_HOST }}
-        jira-project-key: '<PROJECT_KEY>'
-        jira-issue-type: 'Bug'
-        jira-labels: '<project_key>,snyk'
-        jira-title-prefix: '[<PROJECT_KEY>] - Snyk :'
-        is_jira_enterprise: true
-        #assign-jira-ticket-to: ''
-        scan-output-path: 'snyk_output.txt'
-        scan-type: 'snyk'
+- name: Install Snyk and Run Snyk test
+  run: |
+    npm install -g snyk
+    snyk test --all-projects --json > snyk_output.txt || true
+  env:
+    SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+- name: use macfc-security-scan-report action to parse Snyk output
+  uses: Enterprise-CMCS/macfc-security-scan-report@v2.7.4
+  with:
+    jira-token: ${{ secrets.JIRA_TOKEN }}
+    jira-host: ${{ secrets.JIRA_HOST }}
+    jira-project-key: '<PROJECT_KEY>'
+    jira-issue-type: 'Bug'
+    jira-labels: '<project_key>,snyk'
+    jira-title-prefix: '[<PROJECT_KEY>] - Snyk :'
+    is_jira_enterprise: true
+    #assign-jira-ticket-to: ''
+    scan-output-path: 'snyk_output.txt'
+    scan-type: 'snyk'
 ```
 
 First the `snyk` CLI will need to be installed with `npm`. It is then used to run a scan using the `snyk test` command. The results are written to the `snyk_output.txt` file, which is then provided as input to this action in the next step, and is used to create Jira tickets from the Snyk findings.
+
+## Snyk IaC Testing
+`snyk iac test` can be run in the same manner as `snyk test`:
+
+```
+- name: Install Snyk and Run Snyk test
+  run: |
+    npm install -g snyk
+    snyk iac test > snyk_output.txt || true
+  env:
+    SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+- name: use macfc-security-scan-report action to parse Snyk output
+  uses: Enterprise-CMCS/macfc-security-scan-report@v2.7.4
+  with:
+    jira-token: ${{ secrets.JIRA_TOKEN }}
+    jira-host: ${{ secrets.JIRA_HOST }}
+    jira-project-key: '<PROJECT_KEY>'
+    jira-issue-type: 'Bug'
+    jira-labels: '<project_key>,snyk'
+    jira-title-prefix: '[<PROJECT_KEY>] - Snyk :'
+    is_jira_enterprise: true
+    # assign-jira-ticket-to: ''
+    scan-output-path: 'snyk_output.txt'
+    scan-type: 'snyk'
+    snyk-test-type: 'iac'
+```
+
+Note that the `snyk-test-type` input has been added. Because the output format of each `snyk` command is different, we must specifiy what kind of Snyk scan is being run to successfully parse the output file and create Jira tickets (if no input is provided for `snyk-test-type`, it defaults to `'open-source'`).
+
+## Snyk Container Testing
+The `snyk container test` command must be provided with at least one image as input:
+```
+snyk container test <registry>/<repository>:<tag> --json > snyk_output.txt
+```
+The `snyk container test` command can accept an arbitrary number of image names as input if you'd like to scan more than one image:
+
+```
+snyk container test <registryA>/<repositoryA>:<tag> <registryB>/<repositoryB>:<tag> --json > snyk_output.txt
+```
+
+The following example demonstrates how to use `snyk container test` in conjunction with this action:
+```
+- name: Login to AWS ECR
+  id: ecr-login
+  uses: aws-actions/amazon-ecr-login@v2
+
+- name: Install Snyk and Run Snyk test
+  env:
+    SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+    REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+    REPOSITORY: my-ecr-repo
+    IMAGE_TAG: latest
+  run: |
+    npm install -g snyk
+    snyk container test $REGISTRY/$REPOSITORY:$IMAGE_TAG --json > snyk_output.txt || true
+
+- name: Use Github Action to parse Snyk output
+  uses: Enterprise-CMCS/macfc-security-scan-report@hms-snyk-updates-b
+  with:
+      jira-token: ${{ secrets.JIRA_SNYK_TOKEN }}
+      jira-host: ${{ secrets.JIRA_HOST_NAME }}
+      jira-project-key: 'CMCSMACD'
+      jira-issue-type: 'Bug'
+      jira-labels: 'CMCSMACD,snyk'
+      jira-title-prefix: '[CMCSMACD] - Snyk :'
+      is_jira_enterprise: true
+      scan-output-path: 'snyk_output.txt'
+      scan-type: 'snyk'
+      snyk-test-type: 'container'
+```
+
+This example demonstrates how to scan an image that is stored in an ECR repository, and is therefore using the [`aws-actions/amazon-ecr-login` action](https://github.com/aws-actions/amazon-ecr-login) to log in. This `snyk` command will need credentials to pull the image from whichever repository stores it. Note that if your image is stored in a repository other than ECR, you will need to take different measures to log into the repository.
+
+**PLEASE NOTE:** The output of each of these three CLI commands varies in it's format, therefore you may only run a single command at a time in conjunction with this action. If you'd like to run multiple commands in the same workflow, you will need a separate ticket creation step for each command. For example:
+
+```
+# First run `snyk test` and create Jira tickets
+
+- name: Install Snyk and Run Snyk test
+  run: |
+    npm install -g snyk
+    snyk test --all-projects --json > snyk_output.txt || true
+  env:
+    SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+- name: use macfc-security-scan-report action to parse Snyk Test output
+  uses: Enterprise-CMCS/macfc-security-scan-report@v2.7.4
+  with:
+    jira-token: ${{ secrets.JIRA_TOKEN }}
+    jira-host: ${{ secrets.JIRA_HOST }}
+    jira-project-key: '<PROJECT_KEY>'
+    jira-issue-type: 'Bug'
+    jira-labels: '<project_key>,snyk'
+    jira-title-prefix: '[<PROJECT_KEY>] - Snyk :'
+    is_jira_enterprise: true
+    #assign-jira-ticket-to: ''
+    scan-output-path: 'snyk_output.txt'
+
+
+# Then run `snyk container test`, and create Jira tickets
+
+- name: Login to AWS ECR
+  id: ecr-login
+  uses: aws-actions/amazon-ecr-login@v2
+
+- name: Install Snyk and Run Snyk test
+  env:
+    SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+    REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+    REPOSITORY: my-ecr-repo
+    IMAGE_TAG: latest
+  run: |
+    npm install -g snyk
+    snyk container test $REGISTRY/$REPOSITORY:$IMAGE_TAG --json > snyk_output.txt || true
+
+- name: Use Github Action to parse Snyk Container Test output
+  uses: Enterprise-CMCS/macfc-security-scan-report@hms-snyk-updates-b
+  with:
+      jira-token: ${{ secrets.JIRA_SNYK_TOKEN }}
+      jira-host: ${{ secrets.JIRA_HOST_NAME }}
+      jira-project-key: 'CMCSMACD'
+      jira-issue-type: 'Bug'
+      jira-labels: 'CMCSMACD,snyk'
+      jira-title-prefix: '[CMCSMACD] - Snyk :'
+      is_jira_enterprise: true
+      scan-output-path: 'snyk_output.txt'
+      snyk-test-type: 'container'
+```
+
+
+## Triggers
 
 Generally, teams will run Snyk scans with both a Pull Request trigger and a Cron Job trigger. For example:
 ```
