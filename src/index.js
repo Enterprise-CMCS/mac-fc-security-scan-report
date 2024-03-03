@@ -208,6 +208,10 @@ try {
 
       let vulnerabilities = [];
       const minSeverity = core.getInput('min-severity');
+      if (minSeverity && !Severities[minSeverity]) {
+        console.error("invalid input for min-severity; must be set to 'low', 'medium', 'high', or 'critical'");
+        process.exit(2);
+      }
 
       if (inputData) {
         if (core.getInput('snyk-test-type') === 'open-source') {
@@ -296,12 +300,12 @@ try {
 
     function iacDescriptionStr(vulnerability) {
       let descriptionStr = "";
-      descriptionStr += vulnerability.iacDescription.issue    ? `*Issue:*\n ${vulnerability.iacDescription.issue} \n\n ` : '';
-      descriptionStr += vulnerability.iacDescription.impact   ? `*Impact:*\n ${vulnerability.iacDescription.impact} \n\n ` : '';
-      descriptionStr += vulnerability.iacDescription.resolve  ? `*Resolve:*\n ${vulnerability.iacDescription.resolve} \n\n` : '';
-      descriptionStr += vulnerability.filePath                ? `*File:* ${vulnerability.filePath} \n\n ` : '';
-      descriptionStr += vulnerability.lineNumber              ? `*Line Number:* ${vulnerability.lineNumber} \n\n` : '';
-      descriptionStr += vulnerability.documentation           ? `*Documentation:* ${vulnerability.documentation}` : '';
+      descriptionStr += vulnerability.iacDescription.issue   ? `*Issue:*\n ${vulnerability.iacDescription.issue} \n\n ` : '';
+      descriptionStr += vulnerability.iacDescription.impact  ? `*Impact:*\n ${vulnerability.iacDescription.impact} \n\n ` : '';
+      descriptionStr += vulnerability.iacDescription.resolve ? `*Resolve:*\n ${vulnerability.iacDescription.resolve} \n\n` : '';
+      descriptionStr += vulnerability.filePath               ? `*File:* ${vulnerability.filePath} \n\n ` : '';
+      descriptionStr += vulnerability.lineNumber             ? `*Line Number:* ${vulnerability.lineNumber} \n\n` : '';
+      descriptionStr += vulnerability.documentation          ? `*Documentation:* ${vulnerability.documentation}` : '';
       
       return descriptionStr;
     }

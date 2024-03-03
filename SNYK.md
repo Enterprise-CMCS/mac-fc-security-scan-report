@@ -72,6 +72,7 @@ Currently, the `macfc-security-scan-report` action supports Jira Ticket creation
     #assign-jira-ticket-to: ''
     scan-output-path: 'snyk_output.txt'
     scan-type: 'snyk'
+    min-severity: 'high'
 ```
 
 First the `snyk` CLI will need to be installed with `npm`. It is then used to run a scan using the `snyk test` command. The results are written to the `snyk_output.txt` file, which is then provided as input to this action in the next step, and is used to create Jira tickets from the Snyk findings.
@@ -101,9 +102,12 @@ First the `snyk` CLI will need to be installed with `npm`. It is then used to ru
     scan-output-path: 'snyk_output.txt'
     scan-type: 'snyk'
     snyk-test-type: 'iac'
+    min-severity: 'critical'
 ```
 
 Note that the `snyk-test-type` input has been added. Because the output format of each `snyk` command is different, we must specifiy what kind of Snyk scan is being run to successfully parse the output file and create Jira tickets (if no input is provided for `snyk-test-type`, it defaults to `'open-source'`).
+
+**Also note:** `snyk iac test` will most likely detect a lot of low and medium severity level vulnerabilities. To keep the Jira ticket creation at a manageable amount, it is advisiable to not set `min-severity` any lower than `'critical'` or `'high'`.
 
 ## Snyk Container Testing
 The `snyk container test` command must be provided with at least one image as input:
@@ -145,9 +149,10 @@ The following example demonstrates how to use `snyk container test` in conjuncti
       scan-output-path: 'snyk_output.txt'
       scan-type: 'snyk'
       snyk-test-type: 'container'
+      min-severity: 'critical'
 ```
 
-This example demonstrates how to scan an image that is stored in an ECR repository, and is therefore using the [`aws-actions/amazon-ecr-login` action](https://github.com/aws-actions/amazon-ecr-login) to log in. This `snyk` command will need credentials to pull the image from whichever repository stores it. Note that if your image is stored in a repository other than ECR, you will need to take different measures to log into the repository.
+This example demonstrates how to scan an image that is stored in an ECR repository, and is therefore using the [`aws-actions/amazon-ecr-login` action](https://github.com/aws-actions/amazon-ecr-login) to log in. The `snyk container test` command will need credentials to pull the specified image from whichever repository stores it. Note that if your image is stored in a repository other than ECR, you will need to take different measures to log into the repository.
 
 **PLEASE NOTE:** The output of each of these three CLI commands varies in it's format, therefore you may only run a single command at a time in conjunction with this action. If you'd like to run multiple commands in the same workflow, you will need a separate ticket creation step for each command. For example:
 
