@@ -14,6 +14,8 @@ jira-labels:                 Labels to be applied to the created Jira tickets (c
 jira-custom-field-key-value: A JSON string containing key-value pairs of custom fields and their values in Jira.
 assign-jira-ticket-to:       The accountID of a user to assigne a ticket to.
 scan-output-path:            The path to the scan output file.
+snyk-test-type:              The type of Snyk scan being run. Accepts 'open-source', 'iac', or 'container'. Defaults to 'open-source'.
+min-severity:                The minimum severity level a vulnerability must have for a Jira ticket to be created. Accepts 'low', 'medium', 'high', 'critical'.
 ```
 # Usage
 

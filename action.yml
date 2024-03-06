@@ -31,6 +31,9 @@ inputs:
   assign-jira-ticket-to:
     description: 'the assignee accountId to assign the Jira ticket to}'
     required: false
+  min-severity:
+    description: 'minimum severity level that Jira tickets should be created for (acceptable values are "low", "medium", "high", and "critical")'
+    required: false
 # Scan
   zap-risk-code:
     description: 'riskcode type to report'
@@ -42,6 +45,10 @@ inputs:
     description: 'can type to perform "snyk" or "zap"'
     required: false
     default: 'snyk'
+  snyk-test-type:
+    description: 'type of snyk test being performed; can be "open-source", "iac", "container", or "code"'
+    required: false
+    default: 'open-source'
 runs:
   using: node16
   main: dist/index.js

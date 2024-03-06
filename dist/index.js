@@ -9769,27 +9769,117 @@ try {
     })();
   } else if (scanType === 'snyk') {
     function parseSnykOutput(inputData) {
+      
+      // severity level enum
+      const Severities = {
+        low: 0,
+        medium: 1,
+        high: 2,
+        critical: 3
+      };
+
       let vulnerabilities = [];
+      const minSeverity = core.getInput('min-severity');
+      if (minSeverity && !Severities[minSeverity]) {
+        console.error("invalid input for min-severity; must be set to 'low', 'medium', 'high', or 'critical'");
+        process.exit(2);
+      }
+
       if (inputData) {
-        try {
-          const data = JSON.parse(inputData);
-          if (Array.isArray(data)) {
-            for (const project of data) {
-              if (project && project.vulnerabilities && Array.isArray(project.vulnerabilities)) {
-                vulnerabilities = vulnerabilities.concat(project.vulnerabilities);
+        if (core.getInput('snyk-test-type') === 'open-source') {
+          try {
+            const data = JSON.parse(inputData);
+            if (Array.isArray(data)) {
+              for (const project of data) {
+                if (project && project.vulnerabilities && Array.isArray(project.vulnerabilities)) {                  
+                  // vulnerabilities = vulnerabilities.concat(project.vulnerabilities);
+                  project.vulnerabilities.forEach(v => {
+                    if (minSeverity && Severities[v.severity] >= Severities[minSeverity]) {
+                      vulnerabilities.push(v);
+                    }
+                  });
+                }
               }
             }
-          } else {
-            console.error('No Vulnerabilities Detetcted or Invalid JSON data format.');
+          } catch (error) {
+            console.error('Error parsing Snyk output:', error);
+            process.exit(2);
             // vulnerabilities = parseNonJsonData(inputData);
           }
-        } catch (error) {
-          console.error('Error parsing Snyk output:', error);
-          process.exit(2);
-          // vulnerabilities = parseNonJsonData(inputData);
         }
+        else if (core.getInput('snyk-test-type') === 'container') {
+          try {
+            const data = JSON.parse(inputData);
+            if (data && data.vulnerabilities && Array.isArray(data.vulnerabilities)) {
+              data.vulnerabilities.forEach(v => {
+                if (minSeverity && Severities[v.severity] >= Severities[minSeverity]) {
+                  vulnerabilities.push(v);
+                }
+              });
+              // if more than one image is being scanned, any vulnerabilities found in any image after the first will be placed
+              // in a `applications` array in the json output (not sure why it's done this way)
+              if (data.applications && Array.isArray(data.applications)) {
+                data.applications.forEach(app => {
+                  if (app.vulnerabilities && Array.isArray(app.vulnerabilities)) {
+                    app.vulnerabilities.forEach(v => {
+                      if (minSeverity && Severities[v.severity] >= Severities[minSeverity]) {
+                        vulnerabilities.push(v);
+                      }
+                    })
+                  }
+                });
+              }
+            }
+          } catch (error) {
+            console.error('Error parsing Snyk output:', error);
+            process.exit(2);
+            // vulnerabilities = parseNonJsonData(inputData);
+          }
+        }
+        else if (core.getInput('snyk-test-type') === 'iac') {
+          try {
+            const data = JSON.parse(inputData);
+            if (data && Array.isArray(data)) {
+              data.forEach(d => {
+                if (Array.isArray(d.infrastructureAsCodeIssues) && d.infrastructureAsCodeIssues.length > 0) {
+                  d.infrastructureAsCodeIssues.forEach(issue => {
+                    if (minSeverity && Severities[issue.severity] >= Severities[minSeverity]) {
+                      const iacIssue = { ...issue };
+                      iacIssue.filePath = d.targetFilePath;
+                      vulnerabilities.push(iacIssue);
+                    }
+                  });
+                }
+              });
+            }
+          } catch (error) {
+            console.error('Error parsing Snyk output:', error);
+            process.exit(2);
+          }
+        }
+
+        if (vulnerabilities.length === 0) {
+          console.error('No Vulnerabilities Detetcted or Invalid JSON data format.'); 
+        }
+
+        return vulnerabilities;
+
+      } else {
+        console.error('No Vulnerabilities Detetcted or Invalid JSON data format.');
+        // vulnerabilities = parseNonJsonData(inputData);
       }
-      return vulnerabilities;
+    }
+
+    function iacDescriptionStr(vulnerability) {
+      let descriptionStr = "";
+      descriptionStr += vulnerability.iacDescription.issue   ? `*Issue:*\n ${vulnerability.iacDescription.issue} \n\n ` : '';
+      descriptionStr += vulnerability.iacDescription.impact  ? `*Impact:*\n ${vulnerability.iacDescription.impact} \n\n ` : '';
+      descriptionStr += vulnerability.iacDescription.resolve ? `*Resolve:*\n ${vulnerability.iacDescription.resolve} \n\n` : '';
+      descriptionStr += vulnerability.filePath               ? `*File:* ${vulnerability.filePath} \n\n ` : '';
+      descriptionStr += vulnerability.lineNumber             ? `*Line Number:* ${vulnerability.lineNumber} \n\n` : '';
+      descriptionStr += vulnerability.documentation          ? `*Documentation:* ${vulnerability.documentation}` : '';
+      
+      return descriptionStr;
     }
 
     async function createSnykJiraTicket(vulnerability) {
@@ -9817,7 +9907,7 @@ try {
                   "key": `${core.getInput('jira-project-key')}`
                 },
                 "summary": `${core.getInput('jira-title-prefix')}  ${vulnerability.title}`,
-                "description": `${vulnerability.description}`,
+                "description": `${ core.getInput('snyk-test-type') === 'iac' ? iacDescriptionStr(vulnerability) : vulnerability.description}`,
                 "issuetype": {
                   "name": `${core.getInput('jira-issue-type')}`
                 },
