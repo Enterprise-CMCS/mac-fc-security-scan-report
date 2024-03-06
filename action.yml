@@ -34,13 +34,14 @@ inputs:
 # Scan
   zap-risk-code:
     description: 'riskcode type to report'
-    required: true
+    required: false
   scan-output-path:
     description: 'the path to zap sacn output'
     required: true
   scan-type:
     description: 'can type to perform "snyk" or "zap"'
-    required: true 
+    required: false
+    default: 'snyk'
 runs:
   using: node16
   main: dist/index.js
