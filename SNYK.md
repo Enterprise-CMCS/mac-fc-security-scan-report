@@ -53,13 +53,17 @@ Currently, the `macfc-security-scan-report` action supports Jira Ticket creation
 
 ```
 - name: Install Snyk and Run Snyk test
+  id: snyk_test
   run: |
     npm install -g snyk
-    snyk test --all-projects --json > snyk_output.txt || true
+    snyk test --all-projects --json > snyk_output.txt || echo exit_code=$? >> "$GITHUB_OUTPUT"
   env:
     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
+# Handle other exit codes here (see 'Exit Codes' section below)
+
 - name: use macfc-security-scan-report action to parse Snyk output
+  if: steps.snyk_test.outputs.exit_code == '1'
   uses: Enterprise-CMCS/macfc-security-scan-report@v2.7.4
   with:
     jira-token: ${{ secrets.JIRA_TOKEN }}
@@ -82,13 +86,17 @@ First the `snyk` CLI will need to be installed with `npm`. It is then used to ru
 
 ```
 - name: Install Snyk and Run Snyk test
+  id: snyk_iac_test
   run: |
     npm install -g snyk
-    snyk iac test > snyk_output.txt || true
+    snyk iac test > snyk_output.txt || echo exit_code=$? >> "$GITHUB_OUTPUT"
   env:
     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+  
+  # Handle other exit codes here (see 'Exit Codes' section below)
 
 - name: use macfc-security-scan-report action to parse Snyk output
+  if: steps.snyk_iac_test.outputs.exit_code == '1'
   uses: Enterprise-CMCS/macfc-security-scan-report@v2.7.4
   with:
     jira-token: ${{ secrets.JIRA_TOKEN }}
@@ -127,6 +135,7 @@ The following example demonstrates how to use `snyk container test` in conjuncti
   uses: aws-actions/amazon-ecr-login@v2
 
 - name: Install Snyk and Run Snyk test
+  id: snyk_container_test
   env:
     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
     REGISTRY: ${{ steps.ecr-login.outputs.registry }}
@@ -134,10 +143,13 @@ The following example demonstrates how to use `snyk container test` in conjuncti
     IMAGE_TAG: latest
   run: |
     npm install -g snyk
-    snyk container test $REGISTRY/$REPOSITORY:$IMAGE_TAG --json > snyk_output.txt || true
+    snyk container test $REGISTRY/$REPOSITORY:$IMAGE_TAG --json > snyk_output.txt || echo exit_code=$? >> "$GITHUB_OUTPUT"
+
+# Handle other exit codes (see 'Exit Codes' section below)
 
 - name: Use Github Action to parse Snyk output
-  uses: Enterprise-CMCS/macfc-security-scan-report@hms-snyk-updates-b
+  if: steps.snyk_container_test.outputs.exit_code == '1'
+  uses: Enterprise-CMCS/macfc-security-scan-report@v2.7.4
   with:
       jira-token: ${{ secrets.JIRA_SNYK_TOKEN }}
       jira-host: ${{ secrets.JIRA_HOST_NAME }}
@@ -160,13 +172,17 @@ This example demonstrates how to scan an image that is stored in an ECR reposito
 # First run `snyk test` and create Jira tickets
 
 - name: Install Snyk and Run Snyk test
+  id: snyk_test
   run: |
     npm install -g snyk
-    snyk test --all-projects --json > snyk_output.txt || true
+    snyk test --all-projects --json > snyk_output.txt || echo exit_code=$? >> "$GITHUB_OUTPUT"
   env:
     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
+# Handle other exit codes here (see 'Exit Codes' section below)
+
 - name: use macfc-security-scan-report action to parse Snyk Test output
+  if: steps.snyk_test.outputs.exit_code == '1'
   uses: Enterprise-CMCS/macfc-security-scan-report@v2.7.4
   with:
     jira-token: ${{ secrets.JIRA_TOKEN }}
@@ -187,6 +203,7 @@ This example demonstrates how to scan an image that is stored in an ECR reposito
   uses: aws-actions/amazon-ecr-login@v2
 
 - name: Install Snyk and Run Snyk test
+  id: snyk_container_test
   env:
     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
     REGISTRY: ${{ steps.ecr-login.outputs.registry }}
@@ -194,10 +211,13 @@ This example demonstrates how to scan an image that is stored in an ECR reposito
     IMAGE_TAG: latest
   run: |
     npm install -g snyk
-    snyk container test $REGISTRY/$REPOSITORY:$IMAGE_TAG --json > snyk_output.txt || true
+    snyk container test $REGISTRY/$REPOSITORY:$IMAGE_TAG --json > snyk_output.txt || echo exit_code=$? >> "$GITHUB_OUTPUT"
+
+# Handle other exit codes here (see 'Exit Codes' section below)
 
 - name: Use Github Action to parse Snyk Container Test output
-  uses: Enterprise-CMCS/macfc-security-scan-report@hms-snyk-updates-b
+  if: steps.snyk_container_test.outputs.exit_code == '1'
+  uses: Enterprise-CMCS/macfc-security-scan-report@v2.7.4
   with:
       jira-token: ${{ secrets.JIRA_SNYK_TOKEN }}
       jira-host: ${{ secrets.JIRA_HOST_NAME }}
@@ -208,6 +228,54 @@ This example demonstrates how to scan an image that is stored in an ECR reposito
       is_jira_enterprise: true
       scan-output-path: 'snyk_output.txt'
       snyk-test-type: 'container'
+```
+
+## Exit Codes
+Each `snyk` command will return an exit code from 0 to 3. In all the above examples, by appending `|| echo exit_code=$? >> "$GITHUB_OUTPUT"` to each `snyk` command, the exit code is being set as an output variable that can then be referenced in subsequent steps. It is advisable to handle each different exit code when using Snyk in conjunction with this action. Below is an example of how to do this using the `snyk test` command:
+
+```
+- name: Install Snyk and Run Snyk test
+  id: snyk_test
+  run: |
+    npm install -g snyk
+    snyk test --all-projects --json > snyk_output.json || echo exit_code=$? >> "$GITHUB_OUTPUT"
+  env:
+    SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+# Exit code 0 implies no vulnerabilities were found and no errors occurred; exit action successfully
+- name: No Vulnerabilities found, exit successfully
+  if: steps.snyk_test.outputs.exit_code == '0'
+  run: exit 0
+
+# Exit code 1 implies vulnerabilities were found; run step to create Jira tickets
+- name: Vulnerabilities found; create Jira tickets
+  if: steps.snyk_test.outputs.exit_code == '1'
+  uses: Enterprise-CMCS/macfc-security-scan-report@v2.7.4
+  with:
+      jira-token: ${{ secrets.JIRA_SNYK_TOKEN }}
+      jira-host: ${{ secrets.JIRA_HOST_NAME }}
+      jira-project-key: 'CMCSMACD'
+      jira-issue-type: 'Bug'
+      jira-labels: 'CMCSMACD,snyk'
+      jira-title-prefix: '[CMCSMACD] - Snyk :'
+      is_jira_enterprise: true
+      assign-jira-ticket-to: 'SYQC'
+      scan-output-path: 'snyk_output.json'
+      scan-type: 'snyk'
+      min-severity: 'medium'
+
+# Exit code 2 implies errors occured during the scan; output the contents of snyk_output.json to examine the errors
+- name: Scan failed; log errors
+  if: steps.snyk_test.outputs.exit_code == '2'
+  run: |
+    cat snyk_output.json
+    exit 1
+
+# Exit code 3 implies no projects detected
+- name: No supported projects detected
+  if: steps.snyk_test.outputs.exit_code == '3'
+  run: |
+    exit 1
 ```
 
 
@@ -224,7 +292,6 @@ on:
 
 
 This activates the Snyk scan whenever a Pull Request is opened as well as at a regular interval at the time specified. A full workflow with both of these triggers could be written as follows: 
-
 
 ```
 on:
@@ -259,14 +326,18 @@ snyk_nightly_run:
           uses: actions/checkout@v3
   
         - name: Install Snyk and Run Snyk test
+          id: snyk_test
           run: |
             npm install -g snyk
-            snyk test --all-projects --json > snyk_output.txt || true
+            snyk test --all-projects --json > snyk_output.txt || echo exit_code=$? >> "$GITHUB_OUTPUT"
             cat snyk_output.txt
           env:
             SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        
+        # Handle other exit codes...
           
         - name: use macfc-security-scan-report action to parse Snyk output
+          if: steps.snyk_test.outputs.exit_code == '1'
           uses: Enterprise-CMCS/macfc-security-scan-report@v2.7.4
           with:
               jira-token: ${{ secrets.JIRA_TOKEN }}
