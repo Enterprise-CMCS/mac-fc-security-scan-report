@@ -9768,6 +9768,13 @@ try {
       }
     })();
   } else if (scanType === 'snyk') {
+    const isMajorVersion = (v1,v2)=>{
+      if(!v1 || !v2)
+          return false;
+      const m = v1.split('.')[0] // v1 is 1.0.4 -> 1
+      const m2 = v2.split('.')[0] // v2 is 2.4.5 -> 2
+      return m2 - m > 0; // return true 
+    }
     function parseSnykOutput(inputData) {
       
       // severity level enum
@@ -9955,9 +9962,20 @@ try {
 
       for (const vulnerability of uniqueVulnerabilities) {
         try {
-          console.log(`Creating Jira ticket for vulnerability: ${vulnerability.title}`);
-          const resp = await createSnykJiraTicket(vulnerability);
-          console.log(resp)
+          const fixedIn = vulnerability.fixedIn? vulnerability.fixedIn.sort().reverse(): [];
+          console.log(
+            `Current Version is : ${vulnerability.version} and New Version recommendations : ${fixedIn}`
+          );
+          if(fixedIn.length && isMajorVersion(vulnerability.version, fixedIn[0])){
+            console.log('This version update is major update')
+            console.log(
+                `Creating Jira ticket for vulnerability: ${vulnerability.title}`
+            );
+            const resp = await createSnykJiraTicket(vulnerability);
+            console.log(resp)
+          } else {
+            console.log('skipping because not major update')
+          }
         } catch (error) {
           console.error(`Error while creating Jira ticket for vulnerability ${vulnerability.title}:`, error);
           process.exit(3);
@@ -9974,6 +9992,7 @@ try {
   core.setFailed(error.message);
   process.exit(5);
 }
+
 })();
 
 module.exports = __webpack_exports__;
