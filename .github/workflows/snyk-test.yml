@@ -1,12 +1,10 @@
 name: Snyk Jira Ticket Creation Workflow
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
-      - zarate-snyk-report
   pull_request:
-    branches: [ main, zarate-snyk-report ]
+    branches: [ main ]
 jobs:
   create_snyk_ticket:
     name: Snyk Run 
@@ -38,6 +36,4 @@ jobs:
           is_jira_enterprise: false
           assign-jira-ticket-to: ${{ secrets.ACCOUNT_ID_AT }}
           scan-output-path: 'snyk_output.txt'
-          scan-type: 'snyk'
-          snyk-test-type: 'container' 
-          major-version-only: 'true'
+          scan-type: 'snyk' 
