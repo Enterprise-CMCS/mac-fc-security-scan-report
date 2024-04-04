@@ -196,13 +196,17 @@ try {
       }
     })();
   } else if (scanType === 'snyk') {
-    const isMajorVersion = (v1,v2)=>{
-      if(!v1 || !v2)
-          return false;
-      const m = v1.split('.')[0] // v1 is 1.0.4 -> 1
-      const m2 = v2.split('.')[0] // v2 is 2.4.5 -> 2
-      return m2 - m > 0; // return true 
-    }
+    const isMajorVersion = (v1, v2) => {
+      if (!v1 || !v2 || typeof v1 !== 'string' || typeof v2 !== 'string' ||
+          !/\d+\.\d+\.\d+/.test(v1) || !/\d+\.\d+\.\d+/.test(v2)) {
+          return false; // If either version is not provided, or they are not in the correct format
+      }
+  
+      const m = v1.split('.')[0]; // v1 is 1.0.4 -> 1
+      const m2 = v2.split('.')[0]; // v2 is 2.4.5 -> 2
+  
+      return m2 - m > 0; // return true if v2's major version is greater than v1's major version
+    }  
     function parseSnykOutput(inputData) {
       
       // severity level enum
