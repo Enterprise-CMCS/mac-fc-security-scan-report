@@ -9947,9 +9947,10 @@ try {
         process.exit(3);
       }
     }
-
     (async () => {
       const scanOutputFilePath = core.getInput('scan-output-path');
+      const majorVersionOnly = core.getInput('major-version-only');
+
       const jsonData = fs.readFileSync(scanOutputFilePath, 'utf-8');
 
       const vulnerabilities = parseSnykOutput(jsonData);
@@ -9959,29 +9960,42 @@ try {
         .map(title => {
           return vulnerabilities.find(v => v.title === title);
         });
-
-      for (const vulnerability of uniqueVulnerabilities) {
-        try {
-          const fixedIn = vulnerability.fixedIn? vulnerability.fixedIn.sort().reverse(): [];
-          console.log(
-            `Current Version is : ${vulnerability.version} and New Version recommendations : ${fixedIn}`
-          );
-          if(fixedIn.length && isMajorVersion(vulnerability.version, fixedIn[0])){
-            console.log('This version update is major update')
+      if(majorVersionOnly == 'true') {
+        for (const vulnerability of uniqueVulnerabilities) {
+          try {
+            const fixedIn = vulnerability.fixedIn? vulnerability.fixedIn.sort().reverse(): [];
             console.log(
-                `Creating Jira ticket for vulnerability: ${vulnerability.title}`
+              `Current Version is : ${vulnerability.version} and New Version recommendations : ${fixedIn}`
             );
-            const resp = await createSnykJiraTicket(vulnerability);
-            console.log(resp)
-          } else {
-            console.log('skipping because not major update')
+            if(fixedIn.length && isMajorVersion(vulnerability.version, fixedIn[0])){
+              console.log('This version update is major update')
+              console.log(
+                  `Creating Jira ticket for vulnerability: ${vulnerability.title}`
+              );
+              const resp = await createSnykJiraTicket(vulnerability);
+              console.log(resp)
+            } else {
+              console.log('skipping because not major update')
+            }
+          } catch (error) {
+            console.error(`Error while creating Jira ticket for vulnerability ${vulnerability.title}:`, error);
+            process.exit(3);
           }
-        } catch (error) {
-          console.error(`Error while creating Jira ticket for vulnerability ${vulnerability.title}:`, error);
-          process.exit(3);
+        }
+      } else {
+        for (const vulnerability of uniqueVulnerabilities) {
+          try {
+              console.log(
+                  `Creating Jira ticket for vulnerability: ${vulnerability.title}`
+              );
+              const resp = await createSnykJiraTicket(vulnerability);
+              console.log(resp)
+          } catch (error) {
+            console.error(`Error while creating Jira ticket for vulnerability ${vulnerability.title}:`, error);
+            process.exit(3);
+          }
         }
       }
-
     })();
   } else {
     console.error('Invalid scan-type provided. Please provide either "snyk" or "zap".');
