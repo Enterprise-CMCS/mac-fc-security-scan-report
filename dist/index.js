@@ -9893,7 +9893,7 @@ try {
       return descriptionStr;
     }
 
-    async function createSnykJiraTicket(vulnerability) {
+    async function createSnykJiraTicket(vulnerability, comment='') {
       try {
  
         const title = vulnerability.title.replaceAll("\"", "\\\"");
@@ -9911,14 +9911,13 @@ try {
 
             const customFieldKeyValue = core.getInput('jira-custom-field-key-value') ? JSON.parse(core.getInput('jira-custom-field-key-value')) : null;
             const customJiraFields = customFieldKeyValue ? { ...customFieldKeyValue } : null;
-  
             const issue = {
               "fields": {
                 "project": {
                   "key": `${core.getInput('jira-project-key')}`
                 },
                 "summary": `${core.getInput('jira-title-prefix')}  ${vulnerability.title}`,
-                "description": `${ core.getInput('snyk-test-type') === 'iac' ? iacDescriptionStr(vulnerability) : vulnerability.description}`,
+                "description": `${comment}${ core.getInput('snyk-test-type') === 'iac' ? iacDescriptionStr(vulnerability) : vulnerability.description}`,
                 "issuetype": {
                   "name": `${core.getInput('jira-issue-type')}`
                 },
@@ -9981,17 +9980,13 @@ try {
               `Current Version is : ${vulnerability.version} and New Version recommendations : ${fixedIn}`
             );
             if(fixedIn.length && isMajorVersion(vulnerability.version, fixedIn[0])){
+              const comment = `For this vulnerability, current version is : ${vulnerability.version} and new version recommendations : ${fixedIn}`;
               console.log('This version update is major update')
               console.log(
                   `Creating Jira ticket for vulnerability: ${vulnerability.title}`
               );
-              const resp = await createSnykJiraTicket(vulnerability);
+              const resp = await createSnykJiraTicket(vulnerability, comment);
               console.log(resp)
-              try{
-                await commentOnIssue(resp.key, `For this vuln, Current Version is : ${vulnerability.version} and New Version recommendations : ${fixedIn}`)
-              } catch(e) {
-                console.log('Error while commenting on the issue: ', e)
-              }
             } else {
               console.log('skipping because not major update')
             }
