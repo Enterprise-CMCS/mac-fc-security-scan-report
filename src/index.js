@@ -375,6 +375,15 @@ try {
         process.exit(3);
       }
     }
+    async function commentOnIssue(issueKey, commentText) {
+      const createCommentUrl = `/rest/api/2/issue/${issueKey}/comment`; // Replace issueKey with the key of the issue you want to comment on
+      const comment = {
+          body: commentText // Replace "Your comment here" with the actual comment you want to post
+      };
+
+      const commentResponse = await jira.post(createCommentUrl, comment);
+      return commentResponse;
+    }
     (async () => {
       const scanOutputFilePath = core.getInput('scan-output-path');
       const majorVersionOnly = core.getInput('major-version-only');
@@ -402,6 +411,11 @@ try {
               );
               const resp = await createSnykJiraTicket(vulnerability);
               console.log(resp)
+              try{
+                await commentOnIssue(resp.key, `For this vuln, Current Version is : ${vulnerability.version} and New Version recommendations : ${fixedIn}`)
+              } catch(e) {
+                console.log('Error while commenting on the issue: ', e)
+              }
             } else {
               console.log('skipping because not major update')
             }
