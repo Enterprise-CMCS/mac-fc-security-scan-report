@@ -38,5 +38,6 @@ jobs:
           is_jira_enterprise: false
           assign-jira-ticket-to: ${{ secrets.ACCOUNT_ID_AT }}
           scan-output-path: 'snyk_output.txt'
-          scan-type: 'snyk' 
+          scan-type: 'snyk'
+          snyk-test-type: 'container' 
           major-version-only: 'true'
