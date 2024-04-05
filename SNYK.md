@@ -77,6 +77,7 @@ Currently, the `macfc-security-scan-report` action supports Jira Ticket creation
     scan-output-path: 'snyk_output.txt'
     scan-type: 'snyk'
     min-severity: 'high'
+    major-version-only: 'true'
 ```
 
 First the `snyk` CLI will need to be installed with `npm`. It is then used to run a scan using the `snyk test` command. The results are written to the `snyk_output.txt` file, which is then provided as input to this action in the next step, and is used to create Jira tickets from the Snyk findings.
@@ -111,6 +112,7 @@ First the `snyk` CLI will need to be installed with `npm`. It is then used to ru
     scan-type: 'snyk'
     snyk-test-type: 'iac'
     min-severity: 'critical'
+    major-version-only: 'true'
 ```
 
 Note that the `snyk-test-type` input has been added. Because the output format of each `snyk` command is different, we must specifiy what kind of Snyk scan is being run to successfully parse the output file and create Jira tickets (if no input is provided for `snyk-test-type`, it defaults to `'open-source'`).
@@ -162,6 +164,7 @@ The following example demonstrates how to use `snyk container test` in conjuncti
       scan-type: 'snyk'
       snyk-test-type: 'container'
       min-severity: 'critical'
+      major-version-only: 'true'
 ```
 
 This example demonstrates how to scan an image that is stored in an ECR repository, and is therefore using the [`aws-actions/amazon-ecr-login` action](https://github.com/aws-actions/amazon-ecr-login) to log in. The `snyk container test` command will need credentials to pull the specified image from whichever repository stores it. Note that if your image is stored in a repository other than ECR, you will need to take different measures to log into the repository.
@@ -263,6 +266,7 @@ Each `snyk` command will return an exit code from 0 to 3. In all the above examp
       scan-output-path: 'snyk_output.json'
       scan-type: 'snyk'
       min-severity: 'medium'
+      major-version-only: 'true'
 
 # Exit code 2 implies errors occured during the scan; output the contents of snyk_output.json to examine the errors
 - name: Scan failed; log errors
@@ -350,6 +354,7 @@ snyk_nightly_run:
               #assign-jira-ticket-to: ''
               scan-output-path: 'snyk_output.txt'
               scan-type: 'snyk'
+              major-version-only: 'true'
 ```
 
 Note that the `snyk_run` job that runs for each PR does not create any Jira tickets from the scan results. This scan is performed to simply provide teams additional visibility to the current vulnerabilities in their project. By running `cat snyk_output.txt`, the current vulnerabilities will be output in the Run Details for the workflow.

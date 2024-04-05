@@ -49,6 +49,10 @@ inputs:
     description: 'type of snyk test being performed; can be "open-source", "iac", "container", or "code"'
     required: false
     default: 'open-source'
+  major-version-only: 
+    description: 'ticket in jira will be created only for the major version of vulnerability package; can be "true" or "false"'
+    required: false
+    default: 'false'
 runs:
   using: node16
   main: dist/index.js

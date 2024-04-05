@@ -196,6 +196,17 @@ try {
       }
     })();
   } else if (scanType === 'snyk') {
+    const isMajorVersion = (v1, v2) => {
+      if (!v1 || !v2 || typeof v1 !== 'string' || typeof v2 !== 'string' ||
+          !/\d+\.\d+\.\d+/.test(v1) || !/\d+\.\d+\.\d+/.test(v2)) {
+          return false; // If either version is not provided, or they are not in the correct format
+      }
+  
+      const m = v1.split('.')[0]; // v1 is 1.0.4 -> 1
+      const m2 = v2.split('.')[0]; // v2 is 2.4.5 -> 2
+  
+      return m2 - m > 0; // return true if v2's major version is greater than v1's major version
+    }  
     function parseSnykOutput(inputData) {
       
       // severity level enum
@@ -310,7 +321,7 @@ try {
       return descriptionStr;
     }
 
-    async function createSnykJiraTicket(vulnerability) {
+    async function createSnykJiraTicket(vulnerability, comment='') {
       try {
  
         const title = vulnerability.title.replaceAll("\"", "\\\"");
@@ -328,14 +339,13 @@ try {
 
             const customFieldKeyValue = core.getInput('jira-custom-field-key-value') ? JSON.parse(core.getInput('jira-custom-field-key-value')) : null;
             const customJiraFields = customFieldKeyValue ? { ...customFieldKeyValue } : null;
-  
             const issue = {
               "fields": {
                 "project": {
                   "key": `${core.getInput('jira-project-key')}`
                 },
                 "summary": `${core.getInput('jira-title-prefix')}  ${vulnerability.title}`,
-                "description": `${ core.getInput('snyk-test-type') === 'iac' ? iacDescriptionStr(vulnerability) : vulnerability.description}`,
+                "description": `${comment}${ core.getInput('snyk-test-type') === 'iac' ? iacDescriptionStr(vulnerability) : vulnerability.description}`,
                 "issuetype": {
                   "name": `${core.getInput('jira-issue-type')}`
                 },
@@ -368,9 +378,19 @@ try {
         process.exit(3);
       }
     }
+    async function commentOnIssue(issueKey, commentText) {
+      const createCommentUrl = `/rest/api/2/issue/${issueKey}/comment`; // Replace issueKey with the key of the issue you want to comment on
+      const comment = {
+          body: commentText // Replace "Your comment here" with the actual comment you want to post
+      };
 
+      const commentResponse = await jira.post(createCommentUrl, comment);
+      return commentResponse;
+    }
     (async () => {
       const scanOutputFilePath = core.getInput('scan-output-path');
+      const majorVersionOnly = core.getInput('major-version-only');
+
       const jsonData = fs.readFileSync(scanOutputFilePath, 'utf-8');
 
       const vulnerabilities = parseSnykOutput(jsonData);
@@ -380,18 +400,43 @@ try {
         .map(title => {
           return vulnerabilities.find(v => v.title === title);
         });
-
-      for (const vulnerability of uniqueVulnerabilities) {
-        try {
-          console.log(`Creating Jira ticket for vulnerability: ${vulnerability.title}`);
-          const resp = await createSnykJiraTicket(vulnerability);
-          console.log(resp)
-        } catch (error) {
-          console.error(`Error while creating Jira ticket for vulnerability ${vulnerability.title}:`, error);
-          process.exit(3);
+      if(majorVersionOnly == 'true') {
+        for (const vulnerability of uniqueVulnerabilities) {
+          try {
+            const fixedIn = vulnerability.fixedIn? vulnerability.fixedIn.sort().reverse(): [];
+            console.log(
+              `Current Version is : ${vulnerability.version} and New Version recommendations : ${fixedIn}`
+            );
+            if(fixedIn.length && isMajorVersion(vulnerability.version, fixedIn[0])){
+              const comment = `For this vulnerability, current version is : ${vulnerability.version} and new version recommendations : ${fixedIn}`;
+              console.log('This version update is major update')
+              console.log(
+                  `Creating Jira ticket for vulnerability: ${vulnerability.title}`
+              );
+              const resp = await createSnykJiraTicket(vulnerability, comment);
+              console.log(resp)
+            } else {
+              console.log('skipping because not major update')
+            }
+          } catch (error) {
+            console.error(`Error while creating Jira ticket for vulnerability ${vulnerability.title}:`, error);
+            process.exit(3);
+          }
+        }
+      } else {
+        for (const vulnerability of uniqueVulnerabilities) {
+          try {
+              console.log(
+                  `Creating Jira ticket for vulnerability: ${vulnerability.title}`
+              );
+              const resp = await createSnykJiraTicket(vulnerability);
+              console.log(resp)
+          } catch (error) {
+            console.error(`Error while creating Jira ticket for vulnerability ${vulnerability.title}:`, error);
+            process.exit(3);
+          }
         }
       }
-
     })();
   } else {
     console.error('Invalid scan-type provided. Please provide either "snyk" or "zap".');
