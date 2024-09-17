@@ -34,6 +34,7 @@ inputs:
   min-severity:
     description: 'minimum severity level that Jira tickets should be created for (acceptable values are "low", "medium", "high", and "critical")'
     required: false
+    default: 'low'
 # Scan
   zap-risk-code:
     description: 'riskcode type to report'
@@ -45,10 +46,6 @@ inputs:
     description: 'can type to perform "snyk" or "zap"'
     required: false
     default: 'snyk'
-  snyk-test-type:
-    description: 'type of snyk test being performed; can be "open-source", "iac", "container", or "code"'
-    required: false
-    default: 'open-source'
   major-version-only: 
     description: 'ticket in jira will be created only for the major version of vulnerability package; can be "true" or "false"'
     required: false
