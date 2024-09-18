@@ -110,12 +110,11 @@ First the `snyk` CLI will need to be installed with `npm`. It is then used to ru
     # assign-jira-ticket-to: ''
     scan-output-path: 'snyk_output.txt'
     scan-type: 'snyk'
-    snyk-test-type: 'iac'
     min-severity: 'critical'
     major-version-only: 'true'
 ```
 
-Note that the `snyk-test-type` input has been added. Because the output format of each `snyk` command is different, we must specifiy what kind of Snyk scan is being run to successfully parse the output file and create Jira tickets (if no input is provided for `snyk-test-type`, it defaults to `'open-source'`).
+Note that the scan type is automatically detected based on the output structure of the snyk command and the supported scan test types are "iac", "open-source" and "container".
 
 **Also note:** `snyk iac test` will most likely detect a lot of low and medium severity level vulnerabilities. To keep the Jira ticket creation at a manageable amount, it is advisiable to not set `min-severity` any lower than `'critical'` or `'high'`.
 
@@ -162,7 +161,6 @@ The following example demonstrates how to use `snyk container test` in conjuncti
       is_jira_enterprise: true
       scan-output-path: 'snyk_output.txt'
       scan-type: 'snyk'
-      snyk-test-type: 'container'
       min-severity: 'critical'
       major-version-only: 'true'
 ```
@@ -230,7 +228,6 @@ This example demonstrates how to scan an image that is stored in an ECR reposito
       jira-title-prefix: '[CMCSMACD] - Snyk :'
       is_jira_enterprise: true
       scan-output-path: 'snyk_output.txt'
-      snyk-test-type: 'container'
 ```
 
 ## Exit Codes
