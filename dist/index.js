@@ -9768,6 +9768,7 @@ try {
       }
     })();
   } else if (scanType === 'snyk') {
+    let snykTestType = ''
     const isMajorVersion = (v1, v2) => {
       if (!v1 || !v2 || typeof v1 !== 'string' || typeof v2 !== 'string' ||
           !/\d+\.\d+\.\d+/.test(v1) || !/\d+\.\d+\.\d+/.test(v2)) {
@@ -9783,10 +9784,10 @@ try {
       
       // severity level enum
       const Severities = {
-        low: 0,
-        medium: 1,
-        high: 2,
-        critical: 3
+        low: 1,
+        medium: 2,
+        high: 3,
+        critical: 4
       };
 
       let vulnerabilities = [];
@@ -9795,11 +9796,26 @@ try {
         console.error("invalid input for min-severity; must be set to 'low', 'medium', 'high', or 'critical'");
         process.exit(2);
       }
-
       if (inputData) {
-        if (core.getInput('snyk-test-type') === 'open-source') {
+        const data = JSON.parse(inputData);
+        if (Array.isArray(data)) {
+          if (data.some(d => d.infrastructureAsCodeIssues)) {
+            snykTestType = 'iac';
+          } else if (data.some(d => d.vulnerabilities)) {
+            snykTestType = 'open-source';
+          }
+        } else if (data && data.vulnerabilities) {
+          snykTestType = 'container';
+        }
+
+        if (!snykTestType) {
+          console.error('Error: Unable to determine Snyk scan type. Invalid or unknown data structure.');
+          process.exit(1);
+        }
+
+        if (snykTestType === 'open-source') {
           try {
-            const data = JSON.parse(inputData);
+            
             if (Array.isArray(data)) {
               for (const project of data) {
                 if (project && project.vulnerabilities && Array.isArray(project.vulnerabilities)) {                  
@@ -9809,8 +9825,12 @@ try {
                       vulnerabilities.push(v);
                     }
                   });
+                } else {
+                  console.error(`Error: Invalid project structure in open-source data. Project data: ${JSON.stringify(project)}`);
                 }
               }
+            }  else {
+              console.error('Error: Open-source scan expected an array, but received invalid data.');
             }
           } catch (error) {
             console.error('Error parsing Snyk output:', error);
@@ -9818,9 +9838,8 @@ try {
             // vulnerabilities = parseNonJsonData(inputData);
           }
         }
-        else if (core.getInput('snyk-test-type') === 'container') {
+        else if (snykTestType === 'container') {
           try {
-            const data = JSON.parse(inputData);
             if (data && data.vulnerabilities && Array.isArray(data.vulnerabilities)) {
               data.vulnerabilities.forEach(v => {
                 if (minSeverity && Severities[v.severity] >= Severities[minSeverity]) {
@@ -9837,9 +9856,13 @@ try {
                         vulnerabilities.push(v);
                       }
                     })
+                  } else {
+                    console.error(`Error: Invalid application structure in container scan. Application data: ${JSON.stringify(app)}`);
                   }
                 });
               }
+            } else {
+              console.error('Error: Container scan expected "vulnerabilities" to be an array, but received invalid data.');
             }
           } catch (error) {
             console.error('Error parsing Snyk output:', error);
@@ -9847,9 +9870,8 @@ try {
             // vulnerabilities = parseNonJsonData(inputData);
           }
         }
-        else if (core.getInput('snyk-test-type') === 'iac') {
+        else if (snykTestType === 'iac') {
           try {
-            const data = JSON.parse(inputData);
             if (data && Array.isArray(data)) {
               data.forEach(d => {
                 if (Array.isArray(d.infrastructureAsCodeIssues) && d.infrastructureAsCodeIssues.length > 0) {
@@ -9860,23 +9882,29 @@ try {
                       vulnerabilities.push(iacIssue);
                     }
                   });
+                }  else {
+                  console.error(`Error: Invalid IAC data structure. InfrastructureAsCodeIssues not found in data: ${JSON.stringify(d)}`);
                 }
               });
+            } else {
+              console.error('Error: IAC scan expected an array, but received invalid data.');
             }
           } catch (error) {
             console.error('Error parsing Snyk output:', error);
             process.exit(2);
           }
+        }  else {
+          console.error(`Error: Unknown Snyk scan type "${snykTestType}".`);
         }
 
         if (vulnerabilities.length === 0) {
-          console.error('No Vulnerabilities Detetcted or Invalid JSON data format.'); 
+          console.error('No Vulnerabilities Detected');
         }
 
         return vulnerabilities;
 
       } else {
-        console.error('No Vulnerabilities Detetcted or Invalid JSON data format.');
+        console.error('No input-data/vulnerabilities Detected');
         // vulnerabilities = parseNonJsonData(inputData);
       }
     }
@@ -9893,7 +9921,7 @@ try {
       return descriptionStr;
     }
 
-    async function createSnykJiraTicket(vulnerability, comment='') {
+    async function createSnykJiraTicket(vulnerability, comment='', snykTestType = 'container') {
       try {
  
         const title = vulnerability.title.replaceAll("\"", "\\\"");
@@ -9917,7 +9945,7 @@ try {
                   "key": `${core.getInput('jira-project-key')}`
                 },
                 "summary": `${core.getInput('jira-title-prefix')}  ${vulnerability.title}`,
-                "description": `${comment}${ core.getInput('snyk-test-type') === 'iac' ? iacDescriptionStr(vulnerability) : vulnerability.description}`,
+                "description": `${comment}${ snykTestType === 'iac' ? iacDescriptionStr(vulnerability) : vulnerability.description}`,
                 "issuetype": {
                   "name": `${core.getInput('jira-issue-type')}`
                 },
@@ -9985,7 +10013,7 @@ try {
               console.log(
                   `Creating Jira ticket for vulnerability: ${vulnerability.title}`
               );
-              const resp = await createSnykJiraTicket(vulnerability, comment);
+              const resp = await createSnykJiraTicket(vulnerability, comment, snykTestType);
               console.log(resp)
             } else {
               console.log('skipping because not major update')

@@ -14,7 +14,6 @@ jira-labels:                 Labels to be applied to the created Jira tickets (c
 jira-custom-field-key-value: A JSON string containing key-value pairs of custom fields and their values in Jira.
 assign-jira-ticket-to:       The accountID of a user to assigne a ticket to.
 scan-output-path:            The path to the scan output file.
-snyk-test-type:              The type of Snyk scan being run. Accepts 'open-source', 'iac', or 'container'. Defaults to 'open-source'.
 min-severity:                The minimum severity level a vulnerability must have for a Jira ticket to be created. Accepts 'low', 'medium', 'high', 'critical'.
 ```
 # Usage
@@ -57,4 +56,4 @@ jobs:
 
 Ensure that you have the required secrets (JIRA_HOST, JIRA_USERNAME, and JIRA_TOKEN) configured in your repository's settings so that they can be accessed by the Action script.
 
-The workflow configuration assumes that you are running the security scan command and saving the output to a file named scan-output.json. Adjust the command and file name according to your specific scan tool and configuration. For more information on how to implement a Snyk scan and use it in conjuction with this action, please view [`SNYK.md`](./SNYK.md).
+The workflow configuration assumes that the security scan command is executed, and the output is saved to a file named scan-output.json. The scan test type is automatically detected based on the structure of the scan output for snyk. Currently, supported snyk test types include IaC, open-source, and container scans. You can adjust the command and file name according to your specific scan tool and configuration. For detailed guidance on implementing a Snyk scan and integrating it with this action, please refer to [`SNYK.md`](./SNYK.md).
