@@ -1,6 +1,6 @@
 {
   "name": "mac-fc-security-scan-report",
-  "description": "This GitHub Action script creates Jira tickets for vulnerabilities detected during security scans.",
+  "description": "",
   "longDescription": "This GitHub Action script creates Jira tickets for vulnerabilities detected during security scans. It supports scans run with Snyk.",
   "status": "Production",
   "permissions": {
@@ -19,7 +19,7 @@
   "repositoryHost": "github.com/CMS-Enterprise",
   "repositoryVisibility": "public",
   "vcs": "git",
-  "laborHours": 0,
+  "laborHours": 5855,
   "reuseFrequency": {
     "forks": 790
   },
@@ -36,9 +36,9 @@
   "maintenance": "contract",
   "contractNumber": "47QTCA21D00AC",
   "date": {
-    "created": "2024-11-24T16:38:00Z",
-    "lastModified": "",
-    "metaDataLastUpdated": ""
+    "created": "2023-06-06T16:15:58Z",
+    "lastModified": "2025-07-10T17:19:47Z",
+    "metaDataLastUpdated": "2025-09-01T00:08:03.639Z"
   },
   "tags": [
     "security",
